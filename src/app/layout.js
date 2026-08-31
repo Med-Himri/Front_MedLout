@@ -4,6 +4,7 @@ import { Rajdhani, Inter } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CartHydrator } from "@/components/CartHydrator";
+import Script from "next/script";
 
 const rajdhani = Rajdhani({
   subsets: ["latin"],
@@ -50,6 +51,20 @@ export default function RootLayout({ children }) {
         className={`${inter.className} antialiased bg-[#121212] text-[#F4F4F5]`}
         suppressHydrationWarning
       >
+        {/* Google Analytics — Strategy set to afterInteractive for LCP Optimization */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-N492E2Z2TR"
+          strategy="afterInteractive"
+        />
+        <Script id="medlout-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-N492E2Z2TR');
+          `}
+        </Script>
+
         <ReduxProvider>
           <CartHydrator />
           {children}
