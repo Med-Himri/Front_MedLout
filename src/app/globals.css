@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ═══════════════════════════════════════════════════════
+   MEDLOUT AUTO — INDUSTRIAL PARTS DESIGN SYSTEM
+   Palette: Deep Red · Steel Navy · Chrome Silver · Charcoal
+   Fonts: Rajdhani (display/headings, technical feel) · Inter (UI/body)
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --ma-charcoal:     #1A1A1A; /* Primary text, dark sections */
+  --ma-charcoal-2:    #2A2A2A; /* Secondary dark surface */
+  --ma-bg-dark:       #121212; /* Unified site-wide background (was split black/white before) */
+  --ma-surface:       #1E1E1E; /* Card/panel surface sitting on the dark background */
+  --ma-surface-2:     #262626; /* Slightly lighter surface for hover/nested cards */
+  --ma-border:        #333333; /* Subtle borders on dark surfaces */
+  --ma-text:          #F4F4F5; /* Primary text on dark background */
+  --ma-text-muted:    #A0A0A0; /* Secondary/muted text on dark background */
+  --ma-steel:         #14283C; /* Navy - secondary accent, headers */
+  --ma-steel-light:   #28405C; /* Lighter navy for hover/tints */
+  --ma-red:           #C41E3A; /* Primary accent - CTAs, highlights */
+  --ma-red-dark:      #8F1529; /* Hover state for red */
+  --ma-chrome:        #B4B4B4; /* Metallic borders/highlights */
+  --ma-chrome-light:  #E5E5E5; /* Light chrome tint */
+  --ma-bg:            #F4F4F5; /* Legacy light background — kept for admin dashboard only */
+  --ma-white:         #FFFFFF;
+  --font-display:     'Rajdhani', system-ui, sans-serif;
+  --font-ui:          'Inter', system-ui, sans-serif;
+}
+
+/* ── Page shell ── */
+.ma-page {
+  background-color: var(--ma-bg);
+  min-height: 100vh;
+  font-family: var(--font-ui);
+}
+
+/* ── Headings ── */
+.ma-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ma-charcoal);
+  text-transform: uppercase;
+}
+
+/* ── Buttons ── */
+.ma-btn-primary {
+  background: var(--ma-red);
+  color: var(--ma-white);
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.ma-btn-primary:hover {
+  background: var(--ma-red-dark);
+}
+
+.ma-btn-secondary {
+  background: var(--ma-charcoal);
+  color: var(--ma-chrome-light);
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--ma-chrome);
+  transition: all 0.2s;
+}
+.ma-btn-secondary:hover {
+  background: var(--ma-steel);
+  border-color: var(--ma-red);
+}
+
+/* ── Cards ── */
+.ma-card {
+  background: var(--ma-white);
+  border: 1px solid rgba(180, 180, 180, 0.3);
+  border-radius: 12px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.ma-card:hover {
+  border-color: var(--ma-red);
+  transform: translateY(-2px);
+}
+
+/* ── Diagonal industrial accent stripe (optional decorative element) ── */
+.ma-stripe-accent {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ma-red),
+    var(--ma-red) 10px,
+    var(--ma-charcoal) 10px,
+    var(--ma-charcoal) 20px
+  );
+  height: 4px;
+}
+
+@media (max-width: 640px) {
+  .ma-heading {
+    font-size: 1.75rem;
+  }
+}
