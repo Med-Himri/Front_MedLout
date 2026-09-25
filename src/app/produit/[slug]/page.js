@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Header } from "@/components/home/Header";
 import { Footer } from "@/components/home/Footer";
 import AddToCartButton from "@/components/cart/AddToCartButton";
-import { CheckCircle, Car, ShieldCheck, Package, ChevronRight } from "lucide-react";
+import { CheckCircle, ShieldCheck, Package, ChevronRight } from "lucide-react";
 import { getUniformThumbnail } from "@/utils/cloudinaryImage";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
   const product = await fetchProduct(slug);
 
   if (!product) {
-    return { title: "Pièce Introuvable | Medlout Auto", robots: { index: false } };
+    return { title: "Produit Introuvable | Medlout Auto", robots: { index: false } };
   }
 
   return {
@@ -68,7 +68,7 @@ export default async function ProductPage({ params }) {
   if (!product) {
     return (
       <div className="py-40 text-center bg-[#121212] min-h-screen text-[#F4F4F5]">
-        <h1 className="text-2xl mb-4">Pièce introuvable.</h1>
+        <h1 className="text-2xl mb-4">Produit introuvable.</h1>
         <Link href="/produit" className="text-[#C41E3A] underline text-sm">
           Retour à la boutique
         </Link>
@@ -78,7 +78,6 @@ export default async function ProductPage({ params }) {
 
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const isInStock = product.stock === "in_stock";
-  const conditionLabel = { new: "Neuf", used: "Occasion", refurbished: "Reconditionné" }[product.condition] || "Neuf";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -86,8 +85,7 @@ export default async function ProductPage({ params }) {
     name: product.title,
     image: [product.mainImage?.url],
     description: product.shortDescription || "",
-    sku: product.sku || product.partNumber,
-    brand: { "@type": "Brand", name: product.brand || "Medlout Auto" },
+    brand: { "@type": "Brand", name: "Medlout Auto" },
     offers: {
       "@type": "Offer",
       url: `https://www.medloutauto.com/produit/${product.slug}`,
@@ -108,7 +106,7 @@ export default async function ProductPage({ params }) {
         <nav className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[#A0A0A0] mb-8">
           <Link href="/produit" className="hover:text-[#C41E3A] transition-colors">Boutique</Link>
           <ChevronRight size={12} />
-          <span className="text-[#F4F4F5]">{translateCategory(product.category) || "Pièce"}</span>
+          <span className="text-[#F4F4F5]">{translateCategory(product.category) || "Produit"}</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-14">
@@ -142,9 +140,6 @@ export default async function ProductPage({ params }) {
                   <Package size={11} /> {translateCategory(product.category)}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5 bg-[#1E1E1E] border border-[#2A2A2A] text-[#F4F4F5] px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                {conditionLabel}
-              </span>
             </div>
 
             <h1
@@ -153,17 +148,6 @@ export default async function ProductPage({ params }) {
             >
               {product.title}
             </h1>
-
-            {(product.brand || product.partNumber) && (
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#A0A0A0] border-b border-[#2A2A2A] pb-5">
-                {product.brand && (
-                  <span>Marque : <strong className="text-[#F4F4F5] font-semibold">{product.brand}</strong></span>
-                )}
-                {product.partNumber && (
-                  <span>Référence : <strong className="text-[#F4F4F5] font-semibold font-mono">{product.partNumber}</strong></span>
-                )}
-              </div>
-            )}
 
             <div className="flex items-baseline gap-3">
               <span className="text-4xl font-bold" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
@@ -186,24 +170,6 @@ export default async function ProductPage({ params }) {
               <CheckCircle size={13} />
               {isInStock ? "En Stock" : "Rupture de Stock"}
             </div>
-
-            {/* Vehicle Compatibility */}
-            {product.compatibility && product.compatibility.length > 0 && (
-              <div className="bg-[#1E1E1E] rounded-xl border border-[#2A2A2A] p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Car size={16} className="text-[#C41E3A]" />
-                  <p className="text-[11px] font-bold uppercase tracking-wider">Compatible Avec</p>
-                </div>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {product.compatibility.map((c, i) => (
-                    <li key={i} className="text-sm text-[#F4F4F5]/85 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C41E3A] shrink-0" />
-                      {c.make} {c.model} <span className="text-[#A0A0A0]">({c.yearFrom}–{c.yearTo})</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
             <p className="text-[#F4F4F5]/70 text-sm leading-relaxed border-l-2 border-[#C41E3A] pl-4">
               {product.shortDescription}

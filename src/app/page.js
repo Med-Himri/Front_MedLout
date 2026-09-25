@@ -3,14 +3,14 @@ import { Hero } from "@/components/home/Hero";
 import { Footer } from "@/components/home/Footer";
 
 export const metadata = {
-  title: "Medlout Auto | Pièces Auto Neuves et d'Occasion au Maroc",
+  title: "Medlout Auto | Accessoires de Qualité au Maroc",
   description:
-    "Découvrez notre large sélection de pièces automobiles pour toutes marques et modèles. Freins, filtres, suspension, électrique et plus. Livraison partout au Maroc.",
+    "Découvrez notre large sélection d'accessoires de qualité. Livraison partout au Maroc.",
   keywords:
-    "pièces auto Maroc, pièces détachées voiture, freins, filtres, suspension, Medlout Auto",
+    "accessoires Maroc, Medlout Auto",
   openGraph: {
-    title: "Medlout Auto | Pièces Auto Neuves et d'Occasion",
-    description: "Pièces automobiles de qualité pour toutes marques et modèles.",
+    title: "Medlout Auto | Accessoires de Qualité",
+    description: "Accessoires de qualité, livraison partout au Maroc.",
     url: "https://www.medloutauto.com/",
     siteName: "Medlout Auto",
     type: "website",

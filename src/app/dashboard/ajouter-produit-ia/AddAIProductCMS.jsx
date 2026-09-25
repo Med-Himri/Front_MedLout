@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import {
-  X, ImagePlus, Sparkles, Loader2, Bot, Package, DollarSign, Tag, Car, ArrowLeft,
+  X, ImagePlus, Sparkles, Loader2, Bot, Package, DollarSign, Tag, ArrowLeft,
 } from "lucide-react";
 import { createAIProductAPI } from "@/services/product.service";
 import { useRouter } from "next/navigation";
@@ -13,15 +13,10 @@ export default function AddAIProductCMS() {
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
-  const [partNumber, setPartNumber] = useState("");
-  const [sku, setSku] = useState("");
-  const [condition, setCondition] = useState("new");
-  const [brand, setBrand] = useState("");
 
   const [mainImage, setMainImage] = useState(null);
   const [mainImagePreview, setMainImagePreview] = useState(null);
   const [galleryItems, setGalleryItems] = useState([]);
-  const [compatibility, setCompatibility] = useState([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,22 +45,6 @@ export default function AddAIProductCMS() {
     });
   };
 
-  const addCompatibility = () => {
-    setCompatibility((prev) => [...prev, { make: "", model: "", yearFrom: "", yearTo: "" }]);
-  };
-
-  const updateCompatibility = (index, field, value) => {
-    setCompatibility((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-  const removeCompatibility = (index) => {
-    setCompatibility((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!productName) return toast.error("Veuillez indiquer un nom de pièce.");
@@ -78,31 +57,17 @@ export default function AddAIProductCMS() {
         productName,
         price,
         discountPrice,
-        partNumber,
-        sku,
-        condition,
-        brand,
         mainImage,
         galleryItems,
-        compatibility: compatibility
-          .filter((c) => c.make && c.model)
-          .map((c) => ({
-            make: c.make,
-            model: c.model,
-            yearFrom: Number(c.yearFrom) || new Date().getFullYear(),
-            yearTo: Number(c.yearTo) || new Date().getFullYear(),
-          })),
       });
 
-      toast.success("Pièce générée par IA et publiée avec succès. 🎉");
+      toast.success("Produit généré par IA et publié avec succès. 🎉");
 
       setProductName(""); setPrice(""); setDiscountPrice("");
-      setPartNumber(""); setSku(""); setCondition("new"); setBrand("");
       if (mainImagePreview) URL.revokeObjectURL(mainImagePreview);
       setMainImage(null); setMainImagePreview(null);
       galleryItems.forEach((item) => URL.revokeObjectURL(item.preview));
       setGalleryItems([]);
-      setCompatibility([]);
     } catch (err) {
       console.error(err);
       toast.error("Échec de la génération IA !");
@@ -135,7 +100,7 @@ export default function AddAIProductCMS() {
               Création Automatisée
             </span>
             <h1 className="text-[2rem] font-bold uppercase tracking-tight flex items-center gap-3" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-              IA Pièce Auto <Bot className="w-8 h-8 text-[#C41E3A]" />
+              IA Accessoire <Bot className="w-8 h-8 text-[#C41E3A]" />
             </h1>
             <p className="text-xs font-medium text-[#626060]">
               Indiquez le nom, le prix et les photos. L'IA génère la description, le SEO et les tags.
@@ -158,11 +123,11 @@ export default function AddAIProductCMS() {
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-white p-6 lg:p-10 rounded-[2rem] border border-[#B4B4B4]/20 shadow-sm space-y-8">
               <div>
-                <label className={labelText}><Package className="w-3.5 h-3.5 text-[#C41E3A]" /> Nom de la Pièce</label>
+                <label className={labelText}><Package className="w-3.5 h-3.5 text-[#C41E3A]" /> Nom du Produit</label>
                 <textarea
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  placeholder="ex. Filtre à Huile Mann pour Diesel..."
+                  placeholder="ex. Sac à Main Cuir Premium..."
                   className="w-full text-[2rem] lg:text-[2.2rem] font-bold text-[#1A1A1A] placeholder:text-gray-300 outline-none bg-transparent tracking-tight leading-tight resize-none h-32"
                   style={{ fontFamily: "'Rajdhani', sans-serif" }}
                   required
@@ -181,70 +146,6 @@ export default function AddAIProductCMS() {
                   <input type="number" min="0" step="0.01" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder="120.00" className={cuteInput} />
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelText}>Référence Constructeur</label>
-                  <input value={partNumber} onChange={(e) => setPartNumber(e.target.value)} placeholder="ex. W712/75" className={cuteInput} />
-                </div>
-                <div>
-                  <label className={labelText}>SKU Interne</label>
-                  <input value={sku} onChange={(e) => setSku(e.target.value)} className={cuteInput} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelText}>État</label>
-                  <select value={condition} onChange={(e) => setCondition(e.target.value)} className={cuteInput}>
-                    <option value="new">Neuf</option>
-                    <option value="used">Occasion</option>
-                    <option value="refurbished">Reconditionné</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={labelText}>Marque</label>
-                  <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="ex. Bosch, Mann" className={cuteInput} />
-                </div>
-              </div>
-            </div>
-
-            {/* Compatibilité — manuelle, jamais générée par l'IA */}
-            <div className="bg-white p-6 lg:p-10 rounded-[2rem] border border-[#B4B4B4]/20 shadow-sm space-y-4">
-              <div className="flex justify-between items-center border-b border-[#B4B4B4]/20 pb-3">
-                <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                  <Car size={16} className="text-[#C41E3A]" /> Compatibilité Véhicule
-                </span>
-                <button type="button" onClick={addCompatibility} className="text-[10px] font-bold uppercase text-[#C41E3A] hover:underline">
-                  + Ajouter
-                </button>
-              </div>
-              <p className="text-[10px] text-[#626060] -mt-2">
-                Saisie manuelle — l'IA ne devine jamais la compatibilité véhicule.
-              </p>
-
-              {compatibility.length > 0 && (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-[1fr_1fr_70px_70px_32px] gap-2 px-1">
-                    <span className="text-[9px] font-bold uppercase text-[#626060]">Marque</span>
-                    <span className="text-[9px] font-bold uppercase text-[#626060]">Modèle</span>
-                    <span className="text-[9px] font-bold uppercase text-[#626060]">De</span>
-                    <span className="text-[9px] font-bold uppercase text-[#626060]">À</span>
-                    <span />
-                  </div>
-                  {compatibility.map((c, i) => (
-                    <div key={i} className="grid grid-cols-[1fr_1fr_70px_70px_32px] gap-2 items-center">
-                      <input placeholder="Toyota" value={c.make} onChange={(e) => updateCompatibility(i, "make", e.target.value)} className={smallInput} />
-                      <input placeholder="Corolla" value={c.model} onChange={(e) => updateCompatibility(i, "model", e.target.value)} className={smallInput} />
-                      <input type="number" placeholder="2015" value={c.yearFrom} onChange={(e) => updateCompatibility(i, "yearFrom", e.target.value)} className={smallInput} />
-                      <input type="number" placeholder="2020" value={c.yearTo} onChange={(e) => updateCompatibility(i, "yearTo", e.target.value)} className={smallInput} />
-                      <button type="button" onClick={() => removeCompatibility(i)} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center">
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

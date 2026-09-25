@@ -6,7 +6,7 @@ import { useQuill } from "react-quilljs";
 import { toast } from "react-toastify";
 import "quill/dist/quill.snow.css";
 import {
-  UploadCloud, Package, DollarSign, Tag, FileText, Car, X, Loader2, Layers, ArrowLeft,
+  UploadCloud, Package, DollarSign, Tag, FileText, Loader2, Layers, ArrowLeft,
 } from "lucide-react";
 import { getProductByIdAPI, updateProductAPI } from "@/services/product.service";
 
@@ -17,7 +17,6 @@ export default function EditProductCMS({ productId }) {
   const [mainPreview, setMainPreview] = useState(null);
   const [existingGallery, setExistingGallery] = useState([]);
   const [newGallery, setNewGallery] = useState([]);
-  const [compatibility, setCompatibility] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -25,8 +24,8 @@ export default function EditProductCMS({ productId }) {
   const galleryRef = useRef(null);
 
   const [form, setForm] = useState({
-    title: "", slug: "", price: "", discountPrice: "", partNumber: "",
-    sku: "", condition: "new", category: "", tags: "", brand: "",
+    title: "", slug: "", price: "", discountPrice: "",
+    category: "", tags: "",
     shortDescription: "", metaTitle: "", metaDescription: "",
   });
 
@@ -58,12 +57,8 @@ export default function EditProductCMS({ productId }) {
           slug: data.slug || "",
           price: data.price || "",
           discountPrice: data.discountPrice || "",
-          partNumber: data.partNumber || "",
-          sku: data.sku || "",
-          condition: data.condition || "new",
           category: data.category || "",
           tags: data.tags ? data.tags.join(", ") : "",
-          brand: data.brand || "",
           shortDescription: data.shortDescription || "",
           metaTitle: data.metaTitle || "",
           metaDescription: data.metaDescription || "",
@@ -71,14 +66,6 @@ export default function EditProductCMS({ productId }) {
 
         if (data.mainImage?.url) setMainPreview(data.mainImage.url);
         if (data.gallery?.length > 0) setExistingGallery(data.gallery);
-        if (data.compatibility?.length > 0) {
-          setCompatibility(
-            data.compatibility.map((c) => ({
-              make: c.make || "", model: c.model || "",
-              yearFrom: c.yearFrom || "", yearTo: c.yearTo || "",
-            }))
-          );
-        }
         if (data.description) {
           setDescription(data.description);
           if (quill) quill.clipboard.dangerouslyPasteHTML(data.description);
@@ -87,7 +74,7 @@ export default function EditProductCMS({ productId }) {
         setIsLoading(false);
       } catch (err) {
         console.error("Erreur de chargement:", err);
-        toast.error("Échec du chargement de la pièce");
+        toast.error("Échec du chargement du produit");
         setIsLoading(false);
       }
     };
@@ -117,22 +104,6 @@ export default function EditProductCMS({ productId }) {
     setNewGallery((p) => [...p, ...files]);
   };
 
-  const addCompatibility = () => {
-    setCompatibility((prev) => [...prev, { make: "", model: "", yearFrom: "", yearTo: "" }]);
-  };
-
-  const updateCompatibility = (index, field, value) => {
-    setCompatibility((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-  const removeCompatibility = (index) => {
-    setCompatibility((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleUpdate = async () => {
     setIsUpdating(true);
     try {
@@ -142,15 +113,8 @@ export default function EditProductCMS({ productId }) {
         description,
         mainImage,
         gallery: newGallery,
-        compatibility: compatibility
-          .filter((c) => c.make && c.model)
-          .map((c) => ({
-            make: c.make, model: c.model,
-            yearFrom: Number(c.yearFrom) || new Date().getFullYear(),
-            yearTo: Number(c.yearTo) || new Date().getFullYear(),
-          })),
       });
-      toast.success("Pièce mise à jour avec succès.");
+      toast.success("Produit mis à jour avec succès.");
       router.push("/dashboard/catalogue");
     } catch (err) {
       console.error(err);
@@ -186,7 +150,7 @@ export default function EditProductCMS({ productId }) {
               Édition
             </span>
             <h1 className="text-xl font-bold uppercase flex items-center gap-2" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-              <Package size={20} className="text-[#C41E3A]" /> Modifier la Pièce
+              <Package size={20} className="text-[#C41E3A]" /> Modifier le Produit
             </h1>
           </div>
         </div>
@@ -205,7 +169,7 @@ export default function EditProductCMS({ productId }) {
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-6">
             <div>
-              <label className={labelClass}>Titre de la Pièce</label>
+              <label className={labelClass}>Titre du Produit</label>
               <input
                 name="title" value={form.title} onChange={handleChange}
                 className="text-xl font-bold w-full outline-none border-b border-[#B4B4B4]/30 focus:border-[#C41E3A] pb-2"
@@ -232,41 +196,6 @@ export default function EditProductCMS({ productId }) {
               </div>
             </div>
           </div>
-
-          {/* Compatibilité */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-4">
-            <div className="flex justify-between items-center border-b border-[#B4B4B4]/20 pb-3">
-              <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                <Car size={16} className="text-[#C41E3A]" /> Compatibilité Véhicule
-              </span>
-              <button type="button" onClick={addCompatibility} className="text-[10px] font-bold uppercase tracking-wider text-[#C41E3A] hover:underline">
-                + Ajouter un Véhicule
-              </button>
-            </div>
-
-            {compatibility.length > 0 && (
-              <div className="space-y-2">
-                <div className="grid grid-cols-[1fr_1fr_80px_80px_32px] gap-2 px-1">
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">Marque</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">Modèle</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">De</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">À</span>
-                  <span />
-                </div>
-                {compatibility.map((c, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_1fr_80px_80px_32px] gap-2 items-center">
-                    <input value={c.make} onChange={(e) => updateCompatibility(i, "make", e.target.value)} className={inputClass} />
-                    <input value={c.model} onChange={(e) => updateCompatibility(i, "model", e.target.value)} className={inputClass} />
-                    <input type="number" value={c.yearFrom} onChange={(e) => updateCompatibility(i, "yearFrom", e.target.value)} className={inputClass} />
-                    <input type="number" value={c.yearTo} onChange={(e) => updateCompatibility(i, "yearTo", e.target.value)} className={inputClass} />
-                    <button type="button" onClick={() => removeCompatibility(i)} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="lg:col-span-4 space-y-6">
@@ -286,16 +215,8 @@ export default function EditProductCMS({ productId }) {
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-3">
             <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-2 border-b border-[#B4B4B4]/20">
-              <Tag size={16} className="text-[#C41E3A]" /> Détails de la Pièce
+              <Tag size={16} className="text-[#C41E3A]" /> Détails du Produit
             </label>
-            <input name="partNumber" placeholder="Référence Constructeur" value={form.partNumber} onChange={handleChange} className={inputClass} />
-            <input name="sku" placeholder="SKU Interne" value={form.sku} onChange={handleChange} className={inputClass} />
-            <select name="condition" value={form.condition} onChange={handleChange} className={inputClass}>
-              <option value="new">Neuf</option>
-              <option value="used">Occasion</option>
-              <option value="refurbished">Reconditionné</option>
-            </select>
-            <input name="brand" placeholder="Marque" value={form.brand} onChange={handleChange} className={inputClass} />
             <input name="category" placeholder="Catégorie" value={form.category} onChange={handleChange} className={inputClass} />
             <input name="tags" placeholder="Tags séparés par virgule" value={form.tags} onChange={handleChange} className={inputClass} />
           </div>

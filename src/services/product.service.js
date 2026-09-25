@@ -10,14 +10,6 @@ export const getSingleProductAPI = async (slug) => {
   return response;
 };
 
-// Recherche par compatibilité véhicule — make/model/year
-export const getProductsByVehicleAPI = async (make, model, year) => {
-  const response = await axiosInstance.get("/api/product/fits", {
-    params: { make, model, year },
-  });
-  return response;
-};
-
 /* ================= ADMIN — LISTE COMPLÈTE (avec statut accepted) ================= */
 export const getProductsAPI = async () => {
   const accessToken = localStorage.getItem("accessToken");
@@ -72,9 +64,9 @@ export const updateProductAPI = async (id, data) => {
   if (!accessToken) throw new Error("Utilisateur non connecté");
 
   const {
-    title, slug, price, discountPrice, partNumber, sku, condition,
-    category, tags, brand, shortDescription, metaTitle, metaDescription,
-    description, mainImage, gallery, compatibility,
+    title, slug, price, discountPrice,
+    category, tags, shortDescription, metaTitle, metaDescription,
+    description, mainImage, gallery,
   } = data;
 
   const formData = new FormData();
@@ -83,20 +75,13 @@ export const updateProductAPI = async (id, data) => {
   formData.append("slug", slug || "");
   formData.append("price", price || "");
   formData.append("discountPrice", discountPrice || "");
-  formData.append("partNumber", partNumber || "");
-  formData.append("sku", sku || "");
-  formData.append("condition", condition || "new");
   formData.append("category", category || "");
   formData.append("tags", Array.isArray(tags) ? tags.join(",") : tags || "");
-  formData.append("brand", brand || "");
   formData.append("shortDescription", shortDescription || "");
   formData.append("metaTitle", metaTitle || "");
   formData.append("metaDescription", metaDescription || "");
   formData.append("description", description || "");
 
-  if (compatibility) {
-    formData.append("compatibility", JSON.stringify(compatibility));
-  }
   if (mainImage) formData.append("mainImage", mainImage);
   gallery?.forEach((img) => formData.append("gallery", img));
 
@@ -120,19 +105,14 @@ export const createProductAPI = async (data) => {
     slug,
     price,
     discountPrice,
-    partNumber,
-    sku,
-    condition,
     category,
     tags,
-    brand,
     shortDescription,
     metaTitle,
     metaDescription,
     description,
     mainImage,
     gallery,
-    compatibility, // [{ make, model, yearFrom, yearTo }]
   } = data;
 
   const formData = new FormData();
@@ -140,21 +120,13 @@ export const createProductAPI = async (data) => {
   formData.append("slug", slug);
   formData.append("price", price);
   formData.append("discountPrice", discountPrice || "");
-  formData.append("partNumber", partNumber || "");
-  formData.append("sku", sku || "");
-  formData.append("condition", condition || "new");
   formData.append("category", category || "");
   formData.append("tags", tags || "");
-  formData.append("brand", brand || "");
   formData.append("shortDescription", shortDescription || "");
   formData.append("metaTitle", metaTitle || "");
   formData.append("metaDescription", metaDescription || "");
   formData.append("description", description || "");
   formData.append("mainImage", mainImage);
-
-  if (compatibility && compatibility.length > 0) {
-    formData.append("compatibility", JSON.stringify(compatibility));
-  }
 
   gallery?.forEach((img) => formData.append("gallery", img));
 
@@ -180,28 +152,15 @@ export const createAIProductAPI = async (data) => {
     productName,
     price,
     discountPrice,
-    partNumber,
-    sku,
-    condition,
-    brand,
     mainImage,
     galleryItems,
-    compatibility,
   } = data;
 
   const formData = new FormData();
   formData.append("productName", productName);
   formData.append("price", price);
   if (discountPrice) formData.append("discountPrice", discountPrice);
-  formData.append("partNumber", partNumber || "");
-  formData.append("sku", sku || "");
-  formData.append("condition", condition || "new");
-  formData.append("brand", brand || "");
   if (mainImage) formData.append("mainImage", mainImage);
-
-  if (compatibility && compatibility.length > 0) {
-    formData.append("compatibility", JSON.stringify(compatibility));
-  }
 
   if (galleryItems && galleryItems.length > 0) {
     const galleryMeta = [];

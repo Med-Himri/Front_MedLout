@@ -23,11 +23,11 @@ const inter = Inter({
 export const metadata = {
   metadataBase: new URL("https://www.medloutauto.com"),
   title: {
-    default: "Medlout Auto | Pièces Auto Neuves et d'Occasion au Maroc",
+    default: "Medlout Auto | Accessoires de Qualité au Maroc",
     template: "%s | Medlout Auto",
   },
   description:
-    "Medlout Auto propose des pièces automobiles de qualité pour toutes marques et modèles : freins, filtres, suspension, électrique et plus. Livraison partout au Maroc.",
+    "Medlout Auto propose des accessoires de qualité. Livraison partout au Maroc.",
   robots: {
     index: true,
     follow: true,

@@ -100,7 +100,7 @@ export function Header() {
                           Votre Panier
                         </span>
                         <span className="text-xs text-[#C41E3A] font-bold">
-                          {totalItems} pièce{totalItems > 1 ? "s" : ""}
+                          {totalItems} article{totalItems > 1 ? "s" : ""}
                         </span>
                       </div>
 

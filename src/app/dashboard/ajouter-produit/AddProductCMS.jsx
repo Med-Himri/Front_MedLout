@@ -10,8 +10,6 @@ import {
   DollarSign,
   Tag,
   FileText,
-  Car,
-  X,
   Loader2,
   Layers,
   ArrowLeft,
@@ -33,7 +31,6 @@ export default function AddProductCMS() {
   const [mainImage, setMainImage] = useState(null);
   const [mainPreview, setMainPreview] = useState(null);
   const [gallery, setGallery] = useState([]);
-  const [compatibility, setCompatibility] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const mainRef = useRef(null);
@@ -44,12 +41,8 @@ export default function AddProductCMS() {
     slug: "",
     price: "",
     discountPrice: "",
-    partNumber: "",
-    sku: "",
-    condition: "new",
     category: "",
     tags: "",
-    brand: "",
     shortDescription: "",
     metaTitle: "",
     metaDescription: "",
@@ -93,23 +86,6 @@ export default function AddProductCMS() {
     setGallery((p) => [...p, ...files]);
   };
 
-  /* ================= Compatibilité véhicule ================= */
-  const addCompatibility = () => {
-    setCompatibility((prev) => [...prev, { make: "", model: "", yearFrom: "", yearTo: "" }]);
-  };
-
-  const updateCompatibility = (index, field, value) => {
-    setCompatibility((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-  const removeCompatibility = (index) => {
-    setCompatibility((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async () => {
     if (!form.title) {
       toast.error("Veuillez indiquer un titre pour la pièce");
@@ -132,32 +108,23 @@ export default function AddProductCMS() {
         description,
         mainImage,
         gallery,
-        compatibility: compatibility
-          .filter((c) => c.make && c.model)
-          .map((c) => ({
-            make: c.make,
-            model: c.model,
-            yearFrom: Number(c.yearFrom) || new Date().getFullYear(),
-            yearTo: Number(c.yearTo) || new Date().getFullYear(),
-          })),
       });
 
-      toast.success("Pièce publiée avec succès.");
+      toast.success("Produit publié avec succès.");
 
       setForm({
-        title: "", slug: "", price: "", discountPrice: "", partNumber: "",
-        sku: "", condition: "new", category: "", tags: "", brand: "",
+        title: "", slug: "", price: "", discountPrice: "",
+        category: "", tags: "",
         shortDescription: "", metaTitle: "", metaDescription: "",
       });
       setMainImage(null);
       setMainPreview(null);
       setGallery([]);
-      setCompatibility([]);
       setDescription("");
       if (quill) quill.setText("");
     } catch (err) {
       console.error(err);
-      toast.error("Échec de la publication de la pièce");
+      toast.error("Échec de la publication du produit");
     } finally {
       setIsSubmitting(false);
     }
@@ -182,7 +149,7 @@ export default function AddProductCMS() {
               Création de Pièce
             </span>
             <h1 className="text-xl font-bold uppercase flex items-center gap-2" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-              <Package size={20} className="text-[#C41E3A]" /> Ajouter une Pièce
+              <Package size={20} className="text-[#C41E3A]" /> Ajouter un Produit
             </h1>
           </div>
         </div>
@@ -193,7 +160,7 @@ export default function AddProductCMS() {
           className="w-full sm:w-auto px-8 py-3 bg-[#1A1A1A] text-white font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-[#C41E3A] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
-          {isSubmitting ? "Publication..." : "Publier la Pièce"}
+          {isSubmitting ? "Publication..." : "Publier le Produit"}
         </button>
       </header>
 
@@ -201,10 +168,10 @@ export default function AddProductCMS() {
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-6">
             <div>
-              <label className={labelClass}>Titre de la Pièce</label>
+              <label className={labelClass}>Titre du Produit</label>
               <input
                 name="title"
-                placeholder="ex. Plaquettes de Frein Avant Bosch"
+                placeholder="ex. Sac à Main Cuir Premium"
                 value={form.title}
                 onChange={handleChange}
                 className="text-xl font-bold w-full outline-none border-b border-[#B4B4B4]/30 focus:border-[#C41E3A] pb-2"
@@ -250,75 +217,6 @@ export default function AddProductCMS() {
               </div>
             </div>
           </div>
-
-          {/* Compatibilité Véhicule */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-4">
-            <div className="flex justify-between items-center border-b border-[#B4B4B4]/20 pb-3">
-              <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                <Car size={16} className="text-[#C41E3A]" /> Compatibilité Véhicule
-              </span>
-              <button
-                type="button"
-                onClick={addCompatibility}
-                className="text-[10px] font-bold uppercase tracking-wider text-[#C41E3A] hover:underline"
-              >
-                + Ajouter un Véhicule
-              </button>
-            </div>
-
-            <p className="text-[11px] text-[#626060]">
-              Laissez vide si la pièce est universelle (compatible avec tous les véhicules).
-            </p>
-
-            {compatibility.length > 0 && (
-              <div className="space-y-2">
-                <div className="grid grid-cols-[1fr_1fr_80px_80px_32px] gap-2 px-1">
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">Marque</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">Modèle</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">De</span>
-                  <span className="text-[9px] font-bold uppercase text-[#626060]">À</span>
-                  <span />
-                </div>
-                {compatibility.map((c, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_1fr_80px_80px_32px] gap-2 items-center">
-                    <input
-                      placeholder="Toyota"
-                      value={c.make}
-                      onChange={(e) => updateCompatibility(i, "make", e.target.value)}
-                      className={inputClass}
-                    />
-                    <input
-                      placeholder="Corolla"
-                      value={c.model}
-                      onChange={(e) => updateCompatibility(i, "model", e.target.value)}
-                      className={inputClass}
-                    />
-                    <input
-                      type="number"
-                      placeholder="2015"
-                      value={c.yearFrom}
-                      onChange={(e) => updateCompatibility(i, "yearFrom", e.target.value)}
-                      className={inputClass}
-                    />
-                    <input
-                      type="number"
-                      placeholder="2020"
-                      value={c.yearTo}
-                      onChange={(e) => updateCompatibility(i, "yearTo", e.target.value)}
-                      className={inputClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeCompatibility(i)}
-                      className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="lg:col-span-4 space-y-6">
@@ -337,20 +235,12 @@ export default function AddProductCMS() {
             </div>
           </div>
 
-          {/* Détails Pièce */}
+          {/* Détails Produit */}
           <div className="bg-white p-5 rounded-xl shadow-sm border border-[#B4B4B4]/20 space-y-3">
             <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-2 border-b border-[#B4B4B4]/20">
-              <Tag size={16} className="text-[#C41E3A]" /> Détails de la Pièce
+              <Tag size={16} className="text-[#C41E3A]" /> Détails du Produit
             </label>
-            <input name="partNumber" placeholder="Référence Constructeur" value={form.partNumber} onChange={handleChange} className={inputClass} />
-            <input name="sku" placeholder="SKU Interne" value={form.sku} onChange={handleChange} className={inputClass} />
-            <select name="condition" value={form.condition} onChange={handleChange} className={inputClass}>
-              <option value="new">Neuf</option>
-              <option value="used">Occasion</option>
-              <option value="refurbished">Reconditionné</option>
-            </select>
-            <input name="brand" placeholder="Marque (ex. Bosch)" value={form.brand} onChange={handleChange} className={inputClass} />
-            <input name="category" placeholder="Catégorie (ex. Freins)" value={form.category} onChange={handleChange} className={inputClass} />
+            <input name="category" placeholder="Catégorie (ex. Sacs)" value={form.category} onChange={handleChange} className={inputClass} />
             <input name="tags" placeholder="Tags séparés par virgule" value={form.tags} onChange={handleChange} className={inputClass} />
           </div>
 

@@ -37,7 +37,7 @@ export default function CatalogueOverview() {
     setActionLoadingId(id);
     try {
       await acceptProductAPI(id);
-      toast.success("Pièce approuvée — elle est maintenant visible sur le site.");
+      toast.success("Produit approuvé — il est maintenant visible sur le site.");
       await getAllProductRequests();
     } catch (err) {
       console.error("Erreur lors de l'approbation:", err);
@@ -51,7 +51,7 @@ export default function CatalogueOverview() {
     setActionLoadingId(id);
     try {
       await rejectProductAPI(id);
-      toast.success("Pièce supprimée");
+      toast.success("Produit supprimé");
       await getAllProductRequests();
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
@@ -76,7 +76,7 @@ export default function CatalogueOverview() {
             Gestion du Catalogue
           </span>
           <h1 className="text-xl font-bold uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-            Toutes les Pièces
+            Tous les Produits
           </h1>
         </div>
       </header>
@@ -87,12 +87,12 @@ export default function CatalogueOverview() {
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white rounded-xl p-16 text-center border border-[#B4B4B4]/20">
-          <p className="text-[#626060]">Aucune pièce dans le catalogue pour le moment.</p>
+          <p className="text-[#626060]">Aucun produit dans le catalogue pour le moment.</p>
           <Link
             href="/dashboard/ajouter-produit"
             className="inline-block mt-6 bg-[#1A1A1A] text-white px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-[#C41E3A] transition-all"
           >
-            Ajouter la Première Pièce
+            Ajouter le Premier Produit
           </Link>
         </div>
       ) : (

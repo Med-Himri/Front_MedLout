@@ -6,8 +6,8 @@ import { SlidersHorizontal, Package } from "lucide-react";
 import { getUniformThumbnail } from "@/utils/cloudinaryImage";
 
 export const metadata = {
-  title: "Boutique | Toutes Nos Pièces Auto",
-  description: "Parcourez notre catalogue complet de pièces automobiles neuves et reconditionnées.",
+  title: "Boutique | Tous Nos Accessoires",
+  description: "Parcourez notre catalogue complet d'accessoires.",
 };
 
 // Categories already in the database were saved in English (from an earlier
@@ -67,10 +67,10 @@ export default async function ProductListPage() {
               className="text-3xl md:text-4xl font-bold uppercase text-[#F4F4F5]"
               style={{ fontFamily: "'Rajdhani', sans-serif" }}
             >
-              Toutes Nos Pièces
+              Tous Nos Accessoires
             </h1>
             <p className="text-sm text-[#A0A0A0]">
-              {products.length} pièce{products.length > 1 ? "s" : ""} disponible{products.length > 1 ? "s" : ""}
+              {products.length} produit{products.length > 1 ? "s" : ""} disponible{products.length > 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default async function ProductListPage() {
               <ul className="space-y-1">
                 <li>
                   <span className="block px-3 py-2 rounded-lg text-xs font-semibold bg-[#C41E3A]/15 text-[#C41E3A] cursor-default">
-                    Toutes les Pièces
+                    Tous les Produits
                   </span>
                 </li>
                 {categories.map((cat) => (
@@ -109,7 +109,7 @@ export default async function ProductListPage() {
             {products.length === 0 ? (
               <div className="bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl py-24 text-center">
                 <Package className="mx-auto text-[#A0A0A0] mb-4" size={32} />
-                <p className="text-[#A0A0A0]">Aucune pièce disponible pour le moment.</p>
+                <p className="text-[#A0A0A0]">Aucun produit disponible pour le moment.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
@@ -132,11 +132,6 @@ export default async function ProductListPage() {
                         {hasDiscount && (
                           <span className="absolute top-2 left-2 bg-[#C41E3A] text-white text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wide">
                             Promo
-                          </span>
-                        )}
-                        {product.condition && product.condition !== "new" && (
-                          <span className="absolute top-2 right-2 bg-[#1A1A1A]/80 text-[#F4F4F5] text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wide backdrop-blur-sm">
-                            {product.condition === "used" ? "Occasion" : "Reconditionné"}
                           </span>
                         )}
                       </div>

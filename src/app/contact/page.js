@@ -58,7 +58,7 @@ export default function ContactPage() {
                   Contactez <span className="text-[#C41E3A]">Medlout Auto</span>
                 </h2>
                 <p className="text-white/70 text-sm mt-4 leading-relaxed">
-                  Une question sur une pièce, sa compatibilité, ou une commande ? Écrivez-nous directement.
+                  Une question sur un produit, sa disponibilité, ou une commande ? Écrivez-nous directement.
                 </p>
               </div>
 
