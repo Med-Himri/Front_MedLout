@@ -1,10 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/home/Header";
 import { Footer } from "@/components/home/Footer";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import ProductGallery from "@/components/product/ProductGallery";
 import { CheckCircle, ShieldCheck, Package, ChevronRight } from "lucide-react";
-import { getUniformThumbnail } from "@/utils/cloudinaryImage";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -112,24 +111,11 @@ export default async function ProductPage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-14">
           {/* Image */}
           <div className="lg:col-span-6">
-            <div className="relative aspect-square bg-[#F4F4F5] rounded-2xl border border-[#2A2A2A] overflow-hidden shadow-2xl">
-              <Image
-                src={getUniformThumbnail(product.mainImage?.url, 1200) || "/fallback.jpg"}
-                alt={product.title}
-                fill
-                priority
-                className="object-contain p-10"
-              />
-            </div>
-            {product.gallery && product.gallery.length > 0 && (
-              <div className="flex gap-3 mt-4">
-                {product.gallery.map((img, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl border border-[#2A2A2A] bg-[#F4F4F5] overflow-hidden">
-                    <Image src={getUniformThumbnail(img.url, 300)} alt={`Vue ${i + 1}`} fill className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+            <ProductGallery
+              mainImage={product.mainImage?.url}
+              gallery={product.gallery}
+              title={product.title}
+            />
           </div>
 
           {/* Details */}

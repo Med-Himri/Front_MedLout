@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useQuill } from "react-quilljs";
 import { toast } from "react-toastify";
 import "quill/dist/quill.snow.css";
@@ -63,10 +63,9 @@ export default function AddProductCMS() {
 
   const { quill, quillRef } = useQuill({ theme: "snow", modules });
 
-  useState(() => {
-    if (quill) {
-      quill.on("text-change", () => setDescription(quill.root.innerHTML));
-    }
+  useEffect(() => {
+    if (!quill) return;
+    quill.on("text-change", () => setDescription(quill.root.innerHTML));
   }, [quill]);
 
   const handleChange = (e) => {
