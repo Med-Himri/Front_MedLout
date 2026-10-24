@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { Plus, Minus, Trash2, ArrowLeft, ShoppingBag } from "lucide-react";
+import { Plus, Minus, Trash2, ArrowLeft, ShoppingBag, Package } from "lucide-react";
 import { increaseQty, decreaseQty, removeFromCart } from "@/redux/slices/cartSlice";
 import { Header } from "@/components/home/Header";
 
@@ -57,7 +57,11 @@ export default function CartPage() {
               {cartItems.map((item) => (
                 <div key={item.id} className="bg-[#1E1E1E] rounded-xl p-6 flex flex-col sm:flex-row gap-6 border border-[#2A2A2A]">
                   <div className="relative w-full sm:w-32 h-32 rounded-lg overflow-hidden bg-[#F4F4F5] shrink-0">
-                    <Image src={item.image} alt={item.title} fill className="object-contain p-3" />
+                    {item.image ? (
+                      <Image src={item.image} alt={item.title} fill sizes="128px" className="object-contain p-3" />
+                    ) : (
+                      <Package className="absolute inset-0 m-auto text-[#B4B4B4]" size={32} />
+                    )}
                   </div>
 
                   <div className="flex-1 flex flex-col justify-between">
@@ -77,6 +81,7 @@ export default function CartPage() {
                       <div className="flex items-center gap-2 bg-[#262626] rounded-full p-1">
                         <button
                           onClick={() => dispatch(decreaseQty(item.id))}
+                          aria-label="Diminuer la quantité"
                           className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1E1E1E] text-[#F4F4F5] hover:text-[#C41E3A] transition-all"
                         >
                           <Minus size={14} />
@@ -84,6 +89,7 @@ export default function CartPage() {
                         <span className="w-8 text-center font-bold text-xs text-[#F4F4F5]">{item.quantity}</span>
                         <button
                           onClick={() => dispatch(increaseQty(item.id))}
+                          aria-label="Augmenter la quantité"
                           className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1E1E1E] text-[#F4F4F5] hover:text-[#C41E3A] transition-all"
                         >
                           <Plus size={14} />

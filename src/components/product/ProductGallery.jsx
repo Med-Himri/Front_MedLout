@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Package } from "lucide-react";
 import { getUniformThumbnail } from "@/utils/cloudinaryImage";
 
 export default function ProductGallery({ mainImage, gallery = [], title }) {
@@ -16,13 +17,18 @@ export default function ProductGallery({ mainImage, gallery = [], title }) {
   return (
     <div>
       <div className="relative aspect-square bg-[#F4F4F5] rounded-2xl border border-[#2A2A2A] overflow-hidden shadow-2xl">
-        <Image
-          src={getUniformThumbnail(selectedUrl, 1200) || "/fallback.jpg"}
-          alt={title}
-          fill
-          priority
-          className="object-contain p-10"
-        />
+        {selectedUrl ? (
+          <Image
+            src={getUniformThumbnail(selectedUrl, 1200)}
+            alt={title}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-contain p-10"
+          />
+        ) : (
+          <Package className="absolute inset-0 m-auto text-[#B4B4B4]" size={64} />
+        )}
       </div>
 
       {allImages.length > 1 && (
@@ -44,6 +50,7 @@ export default function ProductGallery({ mainImage, gallery = [], title }) {
                   src={getUniformThumbnail(img.url, 300)}
                   alt={`Vue ${i + 1}`}
                   fill
+                  sizes="80px"
                   className="object-cover"
                 />
               </button>

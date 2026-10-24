@@ -45,11 +45,11 @@ export async function generateMetadata({ params }) {
   const product = await fetchProduct(slug);
 
   if (!product) {
-    return { title: "Produit Introuvable | Medlout Auto", robots: { index: false } };
+    return { title: "Produit Introuvable", robots: { index: false } };
   }
 
   return {
-    title: `${product.metaTitle || product.title} | Medlout Auto`,
+    title: product.metaTitle || product.title,
     description: product.metaDescription || product.shortDescription,
     alternates: { canonical: `https://www.medloutauto.com/produit/${product.slug}` },
     openGraph: {
@@ -82,7 +82,7 @@ export default async function ProductPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
-    image: [product.mainImage?.url],
+    image: product.mainImage?.url ? [product.mainImage.url] : [],
     description: product.shortDescription || "",
     brand: { "@type": "Brand", name: "Medlout Auto" },
     offers: {

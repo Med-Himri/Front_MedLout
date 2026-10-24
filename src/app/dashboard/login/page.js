@@ -1,107 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { Loader2, Lock, Mail } from "lucide-react";
-import { userLoginAPI } from "@/services/user.service";
+import { Suspense, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { loginAPI } from "@/services/admin.service";
+import { apiError } from "@/utils/axiosInstance";
+import { AuthCard, authButton, authInput, authLabel } from "@/components/admin/AuthCard";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const expired = useSearchParams().get("expired");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!email || !password) {
-      toast.error("Veuillez indiquer votre email et mot de passe");
-      return;
-    }
-
-    setIsSubmitting(true);
+    const f = new FormData(e.currentTarget);
+    setBusy(true);
+    setError("");
     try {
-      const response = await userLoginAPI(email, password);
-      // Backend returns { message, token, username } — not accessToken/user
-      const { token, username } = response.data;
-
-      if (!token) {
-        throw new Error("Aucun token reçu du serveur");
-      }
-
-      localStorage.setItem("accessToken", token);
-      if (username) {
-        localStorage.setItem("username", username);
-      }
-
-      toast.success("Connexion réussie !");
+      const { data } = await loginAPI(f.get("email"), f.get("password"));
+      localStorage.setItem("accessToken", data.token);
+      localStorage.setItem("username", data.username);
       router.push("/dashboard");
     } catch (err) {
-      console.error("Erreur de connexion:", err);
-      const message = err.response?.data?.message || "Email ou mot de passe incorrect";
-      toast.error(message);
-    } finally {
-      setIsSubmitting(false);
+      setError(apiError(err, "Email ou mot de passe incorrect"));
+      setBusy(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1A1A] flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C41E3A]">
-            Espace Staff
-          </span>
-          <h1
-            className="text-2xl font-bold uppercase text-white mt-1"
-            style={{ fontFamily: "'Rajdhani', sans-serif" }}
-          >
-            Medlout <span className="text-[#C41E3A]">Auto</span>
-          </h1>
-        </div>
+    <AuthCard>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {expired && !error && (
+          <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+            Votre session a expiré, reconnectez-vous.
+          </p>
+        )}
+        <label className={authLabel}>
+          Email
+          <input name="email" type="email" autoComplete="username" required className={authInput} />
+        </label>
+        <label className={authLabel}>
+          Mot de passe
+          <input
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            className={authInput}
+          />
+        </label>
+        {error && (
+          <p role="alert" className="text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <button type="submit" disabled={busy} className={authButton}>
+          {busy && <Loader2 size={16} className="animate-spin" />}
+          {busy ? "Connexion..." : "Se Connecter"}
+        </button>
+        <p className="text-center text-xs">
+          <Link href="/dashboard/mot-de-passe-oublie" className="text-[#626060] hover:text-[#C41E3A]">
+            Mot de passe oublié ?
+          </Link>
+        </p>
+      </form>
+    </AuthCard>
+  );
+}
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl p-8 border-t-4 border-[#C41E3A] shadow-2xl space-y-5"
-        >
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#626060] mb-1.5 flex items-center gap-1.5">
-              <Mail size={12} className="text-[#C41E3A]" /> Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-[#B4B4B4]/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-[#C41E3A]"
-              placeholder="staff@medloutauto.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#626060] mb-1.5 flex items-center gap-1.5">
-              <Lock size={12} className="text-[#C41E3A]" /> Mot de Passe
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[#B4B4B4]/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-[#C41E3A]"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 bg-[#1A1A1A] text-white py-3.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#C41E3A] transition-all disabled:opacity-50"
-          >
-            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-            {isSubmitting ? "Connexion..." : "Se Connecter"}
-          </button>
-        </form>
-      </div>
-    </div>
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
