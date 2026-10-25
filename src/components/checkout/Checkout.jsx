@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { CheckCircle, MessageCircle, Loader2 } from "lucide-react";
+import { CheckCircle, MessageCircle, Loader2, Minus, Plus } from "lucide-react";
 import axiosInstance, { apiError } from "@/utils/axiosInstance";
 import { clearCart, removeFromCart } from "@/redux/slices/cartSlice";
 import { openLater, whatsappLink } from "@/lib/site";
+import { getSingleProductAPI } from "@/services/product.service";
 
 const money = (n) => `${Number(n).toFixed(2)} DH`;
 
@@ -45,11 +47,39 @@ export function Checkout() {
   const hydrated = useSelector((state) => state.cart.hydrated);
   const dispatch = useDispatch();
 
+  // "Commander maintenant" on a product page opens /commande?produit=<slug>:
+  // only that product is ordered and the cart is left untouched.
+  const buyNowSlug = useSearchParams().get("produit");
+  const [buyNow, setBuyNow] = useState({ status: buyNowSlug ? "loading" : "off", item: null });
+  const [buyNowQty, setBuyNowQty] = useState(1);
+
+  useEffect(() => {
+    if (!buyNowSlug) {
+      setBuyNow({ status: "off", item: null }); // e.g. back to the normal cart checkout
+      return;
+    }
+    setBuyNow({ status: "loading", item: null });
+    setBuyNowQty(1);
+    getSingleProductAPI(buyNowSlug)
+      .then(({ data: p }) => {
+        if (p.stock !== "in_stock") return setBuyNow({ status: "unavailable", item: null });
+        const promo = p.discountPrice > 0 && p.discountPrice < p.price;
+        setBuyNow({
+          status: "ready",
+          item: { id: p._id, title: p.title, slug: p.slug, price: promo ? p.discountPrice : p.price, image: p.mainImage?.url, partNumber: "" },
+        });
+      })
+      .catch(() => setBuyNow({ status: "unavailable", item: null }));
+  }, [buyNowSlug]);
+
+  const isBuyNow = buyNow.status !== "off";
+  const items = isBuyNow ? (buyNow.item ? [{ ...buyNow.item, quantity: buyNowQty }] : []) : cartItems;
+
   const [form, setForm] = useState({ customerName: "", phone: "", city: "", address: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [placed, setPlaced] = useState(null); // { order, whatsappUrl }
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +93,7 @@ export function Checkout() {
       toast.error("Veuillez indiquer votre nom et numéro de téléphone");
       return;
     }
-    if (cartItems.length === 0) {
+    if (items.length === 0) {
       toast.error("Votre panier est vide");
       return;
     }
@@ -77,7 +107,7 @@ export function Checkout() {
       // Only ids and quantities are sent: the server computes prices and total.
       const { data } = await axiosInstance.post("/api/order/create", {
         ...form,
-        items: cartItems.map((item) => ({ product: item.id, quantity: item.quantity })),
+        items: items.map((item) => ({ product: item.id, quantity: item.quantity })),
       });
       order = data.order;
     } catch (err) {
@@ -86,7 +116,7 @@ export function Checkout() {
         // Something the customer must fix (sold-out item, bad phone…)
         tab.cancel();
         const unavailable = err.response?.data?.unavailable;
-        if (unavailable) dispatch(removeFromCart(unavailable));
+        if (unavailable && !isBuyNow) dispatch(removeFromCart(unavailable));
         toast.error(apiError(err));
         setIsSubmitting(false);
         return;
@@ -95,7 +125,7 @@ export function Checkout() {
       console.error("Erreur lors de l'enregistrement de la commande:", err);
       order = {
         ...form,
-        items: cartItems.map((i) => ({ title: i.title, partNumber: i.partNumber, price: i.price, quantity: i.quantity })),
+        items: items.map((i) => ({ title: i.title, partNumber: i.partNumber, price: i.price, quantity: i.quantity })),
         total,
       };
     }
@@ -103,14 +133,14 @@ export function Checkout() {
     const whatsappUrl = whatsappLink(buildWhatsAppMessage(order));
     tab.go(whatsappUrl);
 
-    dispatch(clearCart());
+    if (!isBuyNow) dispatch(clearCart()); // a quick order never empties the cart
     setPlaced({ order, whatsappUrl });
     setIsSubmitting(false);
   };
 
   if (placed) {
     return (
-      <div className="max-w-xl mx-auto py-24 px-6 text-center space-y-6">
+      <div className="max-w-xl mx-auto pt-36 pb-24 px-6 text-center space-y-6">
         <CheckCircle size={56} className="mx-auto text-[#C41E3A]" />
         <h1 className="text-2xl font-bold text-[#F4F4F5]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
           {placed.order.orderNumber ? `Commande ${placed.order.orderNumber} enregistrée` : "Commande prête"}
@@ -136,9 +166,31 @@ export function Checkout() {
     );
   }
 
-  if (hydrated && cartItems.length === 0) {
+  if (buyNow.status === "loading") {
     return (
-      <div className="max-w-xl mx-auto py-24 px-6 text-center space-y-6">
+      <div className="flex justify-center pt-40 pb-32">
+        <Loader2 className="animate-spin text-[#C41E3A]" size={32} />
+      </div>
+    );
+  }
+
+  if (buyNow.status === "unavailable") {
+    return (
+      <div className="max-w-xl mx-auto pt-36 pb-24 px-6 text-center space-y-6">
+        <p className="text-[#A0A0A0]">Ce produit n&apos;est plus disponible pour le moment.</p>
+        <Link
+          href="/produit"
+          className="inline-block bg-[#C41E3A] text-white px-8 py-4 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-[#8F1529]"
+        >
+          Voir les produits
+        </Link>
+      </div>
+    );
+  }
+
+  if (!isBuyNow && hydrated && cartItems.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto pt-36 pb-24 px-6 text-center space-y-6">
         <p className="text-[#A0A0A0]">Votre panier est vide.</p>
         <Link
           href="/produit"
@@ -151,9 +203,9 @@ export function Checkout() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-16 px-6">
+    <div className="max-w-2xl mx-auto pt-32 pb-16 px-6">
       <h1 className="text-2xl font-bold text-[#F4F4F5] mb-2" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-        Commande
+        {isBuyNow ? "Commande Rapide" : "Commande"}
       </h1>
       <p className="text-sm text-[#A0A0A0] mb-8">
         Remplissez vos informations ci-dessous — nous confirmerons votre commande sur WhatsApp.
@@ -161,14 +213,44 @@ export function Checkout() {
       </p>
 
       <div className="bg-[#1E1E1E] rounded-xl p-5 mb-8 space-y-3 border border-[#2A2A2A]">
-        {cartItems.map((item) => (
-          <div key={item.id} className="flex justify-between gap-4 text-sm">
-            <span className="text-[#F4F4F5]/85">
-              {item.title} × {item.quantity}
-            </span>
-            <span className="text-[#F4F4F5] font-medium whitespace-nowrap">{money(item.price * item.quantity)}</span>
+        {isBuyNow ? (
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+            <div>
+              <Link href={`/produit/${buyNow.item.slug}`} className="text-[#F4F4F5] font-medium hover:text-[#C41E3A]">
+                {buyNow.item.title}
+              </Link>
+              <div className="text-xs text-[#A0A0A0]">{money(buyNow.item.price)} / pièce</div>
+            </div>
+            <div className="flex items-center gap-2 bg-[#262626] rounded-full p-1">
+              <button
+                type="button"
+                onClick={() => setBuyNowQty((q) => Math.max(1, q - 1))}
+                aria-label="Diminuer la quantité"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1E1E1E] text-[#F4F4F5] hover:text-[#C41E3A]"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="w-8 text-center font-bold text-xs text-[#F4F4F5]" aria-live="polite">{buyNowQty}</span>
+              <button
+                type="button"
+                onClick={() => setBuyNowQty((q) => Math.min(99, q + 1))}
+                aria-label="Augmenter la quantité"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1E1E1E] text-[#F4F4F5] hover:text-[#C41E3A]"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
           </div>
-        ))}
+        ) : (
+          cartItems.map((item) => (
+            <div key={item.id} className="flex justify-between gap-4 text-sm">
+              <span className="text-[#F4F4F5]/85">
+                {item.title} × {item.quantity}
+              </span>
+              <span className="text-[#F4F4F5] font-medium whitespace-nowrap">{money(item.price * item.quantity)}</span>
+            </div>
+          ))
+        )}
         <div className="flex justify-between pt-3 border-t border-[#2A2A2A] font-bold text-[#F4F4F5]">
           <span>Total</span>
           <span>{money(total)}</span>
@@ -204,7 +286,7 @@ export function Checkout() {
 
         <button
           type="submit"
-          disabled={isSubmitting || cartItems.length === 0}
+          disabled={isSubmitting || items.length === 0}
           className="w-full flex items-center justify-center gap-2 bg-[#C41E3A] text-white py-4 rounded-xl text-sm font-bold uppercase tracking-wide hover:bg-[#8F1529] transition-all disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}

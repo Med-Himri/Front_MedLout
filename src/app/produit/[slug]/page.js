@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/home/Header";
 import { Footer } from "@/components/home/Footer";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import BuyNowButton from "@/components/cart/BuyNowButton";
 import ProductGallery from "@/components/product/ProductGallery";
 import { CheckCircle, ShieldCheck, Package, ChevronRight } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
@@ -162,7 +163,8 @@ export default async function ProductPage({ params }) {
               {product.shortDescription}
             </p>
 
-            <div className="pt-2 max-w-md">
+            <div className="pt-2 max-w-md space-y-3">
+              <BuyNowButton product={product} />
               <AddToCartButton product={product} />
             </div>
 

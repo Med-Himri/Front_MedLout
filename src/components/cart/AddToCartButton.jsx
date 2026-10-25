@@ -62,21 +62,21 @@ export default function AddToCartButton({ product }) {
     );
   }
 
-  const isOutOfStock = product.stock !== "in_stock";
+  // Out of stock: the "Commander maintenant" button already says so
+  if (product.stock !== "in_stock") return null;
 
   return (
     <button
       type="button"
       onClick={handleAdd}
-      disabled={isOutOfStock}
-      className="w-full bg-[#C41E3A] disabled:opacity-40 disabled:cursor-not-allowed
-        text-white py-4 px-8 rounded-lg font-bold text-xs uppercase tracking-widest
-        hover:bg-[#8F1529] transition-all duration-300
-        flex items-center justify-center gap-3 shadow-lg cursor-pointer"
+      className="w-full bg-transparent border-2 border-[#C41E3A] text-[#F4F4F5]
+        py-3.5 px-8 rounded-lg font-bold text-xs uppercase tracking-widest
+        hover:bg-[#C41E3A] transition-all duration-300
+        flex items-center justify-center gap-3 cursor-pointer"
       style={{ fontFamily: "'Rajdhani', sans-serif" }}
     >
       <ShoppingCart size={18} />
-      <span>{isOutOfStock ? "Rupture de Stock" : "Ajouter au Panier"}</span>
+      <span>Ajouter au Panier</span>
     </button>
   );
 }
