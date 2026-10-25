@@ -1,6 +1,7 @@
 import { Header } from "@/components/home/Header";
 import { Hero } from "@/components/home/Hero";
 import { Footer } from "@/components/home/Footer";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata = {
   title: "Medlout Auto | Accessoires de Qualité au Maroc",
@@ -11,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: "Medlout Auto | Accessoires de Qualité",
     description: "Accessoires de qualité, livraison partout au Maroc.",
-    url: "https://www.medloutauto.com/",
+    url: `${SITE_URL}/`,
     siteName: "Medlout Auto",
     type: "website",
     locale: "fr_FR",
