@@ -4,11 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { SlidersHorizontal, Package } from "lucide-react";
 import { getUniformThumbnail } from "@/utils/cloudinaryImage";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata = {
   title: "Boutique — Tous Nos Accessoires",
   description: "Parcourez notre catalogue complet d'accessoires auto. Livraison partout au Maroc, paiement à la livraison.",
-  alternates: { canonical: "https://www.medloutauto.com/produit" },
+  alternates: { canonical: `${SITE_URL}/produit` },
 };
 
 // Categories already in the database were saved in English (from an earlier

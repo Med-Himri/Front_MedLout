@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CartHydrator } from "@/components/CartHydrator";
 import Script from "next/script";
+import { SITE_URL } from "@/lib/site";
 
 const rajdhani = Rajdhani({
   subsets: ["latin"],
@@ -21,7 +22,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://www.medloutauto.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Medlout Auto | Accessoires de Qualité au Maroc",
     template: "%s | Medlout Auto",
@@ -35,7 +36,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: "https://www.medloutauto.com",
+    url: SITE_URL,
     siteName: "Medlout Auto",
   },
 };

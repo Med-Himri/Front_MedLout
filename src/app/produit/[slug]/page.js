@@ -4,6 +4,7 @@ import { Footer } from "@/components/home/Footer";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import ProductGallery from "@/components/product/ProductGallery";
 import { CheckCircle, ShieldCheck, Package, ChevronRight } from "lucide-react";
+import { SITE_URL } from "@/lib/site";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }) {
   return {
     title: product.metaTitle || product.title,
     description: product.metaDescription || product.shortDescription,
-    alternates: { canonical: `https://www.medloutauto.com/produit/${product.slug}` },
+    alternates: { canonical: `${SITE_URL}/produit/${product.slug}` },
     openGraph: {
       title: product.title,
       description: product.shortDescription,
@@ -87,7 +88,7 @@ export default async function ProductPage({ params }) {
     brand: { "@type": "Brand", name: "Medlout Auto" },
     offers: {
       "@type": "Offer",
-      url: `https://www.medloutauto.com/produit/${product.slug}`,
+      url: `${SITE_URL}/produit/${product.slug}`,
       priceCurrency: "MAD",
       price: String(product.discountPrice || product.price),
       availability: isInStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

@@ -1,6 +1,8 @@
 // Shop-wide constants.
 
-export const SITE_URL = "https://www.medloutauto.com";
+// Public address of the shop, used for Google (canonical URLs, sitemap).
+// When the .com domain is ready, set NEXT_PUBLIC_SITE_URL=https://www.medloutauto.com in Vercel.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://front-med-lout.vercel.app").replace(/\/$/, "");
 
 // WhatsApp number that receives orders and contact messages (international
 // format, digits only). Can be changed without a code edit via NEXT_PUBLIC_WHATSAPP_NUMBER.
