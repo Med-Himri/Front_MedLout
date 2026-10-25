@@ -32,4 +32,6 @@ export const deleteMessageAPI = (id) => axiosInstance.delete(`/api/message/${id}
 export const getStaffAPI = () => axiosInstance.get("/api/user/staff");
 export const createStaffAPI = (data) => axiosInstance.post("/api/user/staff", data);
 export const updateStaffRoleAPI = (id, role) => axiosInstance.patch(`/api/user/staff/${id}`, { role });
+export const setStaffPasswordAPI = (id, password) =>
+  axiosInstance.post(`/api/user/staff/${id}/password`, { password });
 export const deleteStaffAPI = (id) => axiosInstance.delete(`/api/user/staff/${id}`);

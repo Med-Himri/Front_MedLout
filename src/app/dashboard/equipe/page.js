@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { createStaffAPI, deleteStaffAPI, getStaffAPI, updateStaffRoleAPI } from "@/services/admin.service";
+import {
+  createStaffAPI,
+  deleteStaffAPI,
+  getStaffAPI,
+  setStaffPasswordAPI,
+  updateStaffRoleAPI,
+} from "@/services/admin.service";
 import { useAdmin } from "@/components/admin/AdminShell";
 import { useAdminData } from "@/components/admin/useAdminData";
 import { apiError } from "@/utils/axiosInstance";
@@ -60,6 +66,18 @@ export default function StaffPage() {
     }
   };
 
+  // No email needed: the admin chooses the new password and gives it to the person.
+  const resetPassword = async (member) => {
+    const password = prompt(`Nouveau mot de passe pour ${member.name} (8 caractères min.) :`);
+    if (password === null) return;
+    try {
+      const { data } = await setStaffPasswordAPI(member.id, password);
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(apiError(err));
+    }
+  };
+
   const remove = async (member) => {
     if (!confirm(`Supprimer le compte de ${member.name} ? Cette personne ne pourra plus se connecter.`)) return;
     try {
@@ -76,7 +94,8 @@ export default function StaffPage() {
       <PageTitle>Équipe</PageTitle>
       <p className="text-sm text-[#626060]">
         Les personnes qui peuvent se connecter à cet admin. Le compte défini par ADMIN_EMAIL sur le
-        serveur est toujours admin.
+        serveur est toujours admin. Si quelqu&apos;un oublie son mot de passe, cliquez sur
+        « Nouveau mot de passe » et donnez-le-lui.
       </p>
 
       <Card title="Comptes">
@@ -93,7 +112,7 @@ export default function StaffPage() {
                     {m.email} · depuis le {date(m.createdAt)}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <select
                     value={m.role}
                     disabled={isMe}
@@ -105,9 +124,14 @@ export default function StaffPage() {
                     <option value="admin">Admin</option>
                   </select>
                   {!isMe && (
-                    <button onClick={() => remove(m)} className="text-sm text-red-700 hover:underline">
-                      Supprimer
-                    </button>
+                    <>
+                      <button onClick={() => resetPassword(m)} className="text-sm text-[#C41E3A] hover:underline">
+                        Nouveau mot de passe
+                      </button>
+                      <button onClick={() => remove(m)} className="text-sm text-red-700 hover:underline">
+                        Supprimer
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
