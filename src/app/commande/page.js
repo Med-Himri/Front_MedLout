@@ -3,7 +3,7 @@ import { Footer } from "@/components/home/Footer";
 import { Checkout } from "@/components/checkout/Checkout";
 
 export const metadata = {
-  title: "Commande | Medlout Auto",
+  title: "Commande",
   robots: { index: false, follow: false },
 };
 

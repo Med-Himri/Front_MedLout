@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, ShoppingCart, Trash2, ArrowRight, Search } from "lucide-react";
+import { Menu, X, ShoppingCart, Trash2, ArrowRight, Package } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart } from "@/redux/slices/cartSlice";
 
@@ -115,7 +115,11 @@ export function Header() {
                           cartItems.map((item) => (
                             <div key={item.id} className="flex gap-3 p-2.5 hover:bg-[#262626] rounded-lg transition-all group">
                               <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-[#2A2A2A] bg-[#F4F4F5] flex-shrink-0">
-                                <Image src={item.image} alt={item.title} fill className="object-contain p-1" />
+                                {item.image ? (
+                                  <Image src={item.image} alt={item.title} fill sizes="56px" className="object-contain p-1" />
+                                ) : (
+                                  <Package className="absolute inset-0 m-auto text-[#B4B4B4]" size={20} />
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-[#F4F4F5] truncate">{item.title}</p>

@@ -1,182 +1,63 @@
 import axiosInstance from "@/utils/axiosInstance";
 
-export const getAllProductsAPI = async () => {
-  const response = await axiosInstance.get("/api/product/getallproducts");
-  return response;
-};
+/* ================= PUBLIC ================= */
+export const getAllProductsAPI = () => axiosInstance.get("/api/product/getallproducts");
 
-export const getSingleProductAPI = async (slug) => {
-  const response = await axiosInstance.get(`/api/product/${slug}`);
-  return response;
-};
+export const getSingleProductAPI = (slug) => axiosInstance.get(`/api/product/${slug}`);
 
-/* ================= ADMIN — LISTE COMPLÈTE (avec statut accepted) ================= */
-export const getProductsAPI = async () => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) throw new Error("Utilisateur non connecté");
+/* ================= ADMIN — LISTE COMPLÈTE (visibles + masqués) ================= */
+export const getProductsAPI = () => axiosInstance.get("/api/product/getproducts");
 
-  const response = await axiosInstance.get("/api/product/getproducts", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  return response;
-};
+/* ================= ADMIN — DÉTAIL PAR ID ================= */
+export const getProductByIdAPI = (id) => axiosInstance.get(`/api/product/admin/${id}`);
 
-/* ================= ADMIN — DÉTAIL PAR ID (ignore le statut accepted) ================= */
-export const getProductByIdAPI = async (id) => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) throw new Error("Utilisateur non connecté");
-
-  const response = await axiosInstance.get(`/api/product/admin/${id}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  return response;
-};
-
-/* ================= ADMIN — APPROUVER ================= */
-export const acceptProductAPI = async (id) => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) throw new Error("Utilisateur non connecté");
-
-  const response = await axiosInstance.post(
-    "/api/product/acceptproduct",
-    { id },
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  );
-  return response;
-};
+/* ================= ADMIN — PUBLIER ================= */
+export const acceptProductAPI = (id) => axiosInstance.post("/api/product/acceptproduct", { id });
 
 /* ================= ADMIN — SUPPRIMER ================= */
-export const rejectProductAPI = async (id) => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) throw new Error("Utilisateur non connecté");
+export const deleteProductAPI = (id) => axiosInstance.post("/api/product/delete", { id });
 
-  const response = await axiosInstance.post(
-    "/api/product/delete",
-    { id },
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  );
-  return response;
+// Builds the multipart body shared by create and update.
+const productFormData = (data) => {
+  const formData = new FormData();
+  const fields = [
+    "title", "slug", "price", "discountPrice", "stock", "category",
+    "shortDescription", "metaTitle", "metaDescription", "description",
+  ];
+  fields.forEach((key) => formData.append(key, data[key] ?? ""));
+  formData.append("tags", Array.isArray(data.tags) ? data.tags.join(",") : data.tags || "");
+  formData.append("accepted", data.accepted ? "true" : "false");
+  if (data.mainImage) formData.append("mainImage", data.mainImage);
+  data.gallery?.forEach((img) => formData.append("gallery", img));
+  return formData;
 };
+
+/* ================= ADMIN — CRÉER ================= */
+export const createProductAPI = (data) =>
+  axiosInstance.post("/api/product/addproduct", productFormData(data));
 
 /* ================= ADMIN — MODIFIER ================= */
-export const updateProductAPI = async (id, data) => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) throw new Error("Utilisateur non connecté");
-
-  const {
-    title, slug, price, discountPrice,
-    category, tags, shortDescription, metaTitle, metaDescription,
-    description, mainImage, gallery,
-  } = data;
-
-  const formData = new FormData();
+export const updateProductAPI = (id, data) => {
+  const formData = productFormData(data);
   formData.append("id", id);
-  formData.append("title", title || "");
-  formData.append("slug", slug || "");
-  formData.append("price", price || "");
-  formData.append("discountPrice", discountPrice || "");
-  formData.append("category", category || "");
-  formData.append("tags", Array.isArray(tags) ? tags.join(",") : tags || "");
-  formData.append("shortDescription", shortDescription || "");
-  formData.append("metaTitle", metaTitle || "");
-  formData.append("metaDescription", metaDescription || "");
-  formData.append("description", description || "");
-
-  if (mainImage) formData.append("mainImage", mainImage);
-  gallery?.forEach((img) => formData.append("gallery", img));
-
-  const response = await axiosInstance.post("/api/product/updateproduct", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return response;
-};
-export const createProductAPI = async (data) => {
-  if (typeof window === "undefined") return;
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) {
-    throw new Error("Utilisateur non connecté");
+  if (data.removeGallery?.length) {
+    formData.append("removeGallery", JSON.stringify(data.removeGallery));
   }
-
-  const {
-    title,
-    slug,
-    price,
-    discountPrice,
-    category,
-    tags,
-    shortDescription,
-    metaTitle,
-    metaDescription,
-    description,
-    mainImage,
-    gallery,
-  } = data;
-
-  const formData = new FormData();
-  formData.append("title", title);
-  formData.append("slug", slug);
-  formData.append("price", price);
-  formData.append("discountPrice", discountPrice || "");
-  formData.append("category", category || "");
-  formData.append("tags", tags || "");
-  formData.append("shortDescription", shortDescription || "");
-  formData.append("metaTitle", metaTitle || "");
-  formData.append("metaDescription", metaDescription || "");
-  formData.append("description", description || "");
-  formData.append("mainImage", mainImage);
-
-  gallery?.forEach((img) => formData.append("gallery", img));
-
-  const response = await axiosInstance.post("/api/product/addproduct", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  return response;
+  return axiosInstance.post("/api/product/updateproduct", formData);
 };
 
 /* ================= ADMIN — CRÉATION ASSISTÉE PAR IA ================= */
-export const createAIProductAPI = async (data) => {
-  if (typeof window === "undefined") return;
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) {
-    throw new Error("Utilisateur non connecté");
-  }
-
-  const {
-    productName,
-    price,
-    discountPrice,
-    mainImage,
-    galleryItems,
-  } = data;
-
+export const createAIProductAPI = ({ productName, price, discountPrice, mainImage, galleryItems }) => {
   const formData = new FormData();
   formData.append("productName", productName);
   formData.append("price", price);
   if (discountPrice) formData.append("discountPrice", discountPrice);
   if (mainImage) formData.append("mainImage", mainImage);
 
-  if (galleryItems && galleryItems.length > 0) {
-    const galleryMeta = [];
-    galleryItems.forEach((item) => {
-      formData.append("galleryImages", item.file);
-      galleryMeta.push({ alt: item.alt || "" });
-    });
-    formData.append("galleryMeta", JSON.stringify(galleryMeta));
+  if (galleryItems?.length) {
+    galleryItems.forEach((item) => formData.append("galleryImages", item.file));
+    formData.append("galleryMeta", JSON.stringify(galleryItems.map((item) => ({ alt: item.alt || "" }))));
   }
 
-  const response = await axiosInstance.post("/api/product/createaiproduct", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  return response;
+  return axiosInstance.post("/api/product/createaiproduct", formData);
 };
