@@ -5,38 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { CheckCircle, MessageCircle, Loader2, Minus, Plus } from "lucide-react";
+import { CheckCircle, Loader2, Minus, Plus, Printer, ShoppingBag } from "lucide-react";
 import axiosInstance, { apiError } from "@/utils/axiosInstance";
 import { clearCart, removeFromCart } from "@/redux/slices/cartSlice";
-import { openLater, whatsappLink } from "@/lib/site";
 import { getSingleProductAPI } from "@/services/product.service";
 
 const money = (n) => `${Number(n).toFixed(2)} DH`;
-
-// The order number (e.g. ML-7K2QX9) is the link between this WhatsApp message
-// and the same order in the admin (Commandes page).
-const buildWhatsAppMessage = (order) =>
-  [
-    order.orderNumber
-      ? `Nouvelle commande ${order.orderNumber} — Medlout Auto`
-      : `Nouvelle commande — Medlout Auto`,
-    ``,
-    `Client : ${order.customerName}`,
-    `Téléphone : ${order.phone}`,
-    order.city ? `Ville : ${order.city}` : null,
-    order.address ? `Adresse : ${order.address}` : null,
-    ``,
-    `Articles :`,
-    ...order.items.map(
-      (item) =>
-        `- ${item.title}${item.partNumber ? ` (Réf. ${item.partNumber})` : ""} x${item.quantity} — ${money(item.price * item.quantity)}`
-    ),
-    ``,
-    `Total : ${money(order.total)}`,
-    order.notes ? `\nNotes : ${order.notes}` : null,
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
 
 const inputClass =
   "w-full bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl px-4 py-3 text-sm text-[#F4F4F5] outline-none focus:border-[#C41E3A]";
@@ -77,7 +51,7 @@ export function Checkout() {
 
   const [form, setForm] = useState({ customerName: "", phone: "", city: "", address: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [placed, setPlaced] = useState(null); // { order, whatsappUrl }
+  const [placed, setPlaced] = useState(null); // the saved order, shown as a receipt
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -98,72 +72,32 @@ export function Checkout() {
       return;
     }
 
-    // Open the WhatsApp tab now, while we're still inside the click
-    const tab = openLater();
     setIsSubmitting(true);
-
-    let order;
     try {
-      // Only ids and quantities are sent: the server computes prices and total.
+      // Only ids and quantities are sent: the server computes prices and total,
+      // saves the order (admin → Commandes) and emails the shop.
       const { data } = await axiosInstance.post("/api/order/create", {
         ...form,
         items: items.map((item) => ({ product: item.id, quantity: item.quantity })),
       });
-      order = data.order;
+      if (!isBuyNow) dispatch(clearCart()); // a quick order never empties the cart
+      setPlaced(data.order);
+      window.scrollTo({ top: 0 });
     } catch (err) {
-      const status = err.response?.status;
-      if (status === 400 || status === 429) {
-        // Something the customer must fix (sold-out item, bad phone…)
-        tab.cancel();
-        const unavailable = err.response?.data?.unavailable;
-        if (unavailable && !isBuyNow) dispatch(removeFromCart(unavailable));
-        toast.error(apiError(err));
-        setIsSubmitting(false);
-        return;
-      }
-      // Server unreachable: still send the order on WhatsApp so it isn't lost
-      console.error("Erreur lors de l'enregistrement de la commande:", err);
-      order = {
-        ...form,
-        items: items.map((i) => ({ title: i.title, partNumber: i.partNumber, price: i.price, quantity: i.quantity })),
-        total,
-      };
+      const unavailable = err.response?.data?.unavailable;
+      if (unavailable && !isBuyNow) dispatch(removeFromCart(unavailable));
+      toast.error(
+        err.response
+          ? apiError(err) // something to fix: sold-out item, phone number…
+          : "Impossible d'envoyer la commande. Vérifiez votre connexion et réessayez."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const whatsappUrl = whatsappLink(buildWhatsAppMessage(order));
-    tab.go(whatsappUrl);
-
-    if (!isBuyNow) dispatch(clearCart()); // a quick order never empties the cart
-    setPlaced({ order, whatsappUrl });
-    setIsSubmitting(false);
   };
 
   if (placed) {
-    return (
-      <div className="max-w-xl mx-auto pt-36 pb-24 px-6 text-center space-y-6">
-        <CheckCircle size={56} className="mx-auto text-[#C41E3A]" />
-        <h1 className="text-2xl font-bold text-[#F4F4F5]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-          {placed.order.orderNumber ? `Commande ${placed.order.orderNumber} enregistrée` : "Commande prête"}
-        </h1>
-        <p className="text-sm text-[#A0A0A0]">
-          Dernière étape : <strong className="text-[#F4F4F5]">envoyez le message WhatsApp</strong> qui
-          vient de s&apos;ouvrir. Nous vous rappelons pour confirmer la commande et la livraison.
-        </p>
-        <a
-          href={placed.whatsappUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 bg-[#25D366] text-white px-6 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wide hover:opacity-90"
-        >
-          <MessageCircle size={18} /> Ouvrir WhatsApp
-        </a>
-        <p>
-          <Link href="/produit" className="text-sm text-[#A0A0A0] underline hover:text-[#C41E3A]">
-            Continuer mes achats
-          </Link>
-        </p>
-      </div>
-    );
+    return <Receipt order={placed} />;
   }
 
   if (buyNow.status === "loading") {
@@ -208,7 +142,7 @@ export function Checkout() {
         {isBuyNow ? "Commande Rapide" : "Commande"}
       </h1>
       <p className="text-sm text-[#A0A0A0] mb-8">
-        Remplissez vos informations ci-dessous — nous confirmerons votre commande sur WhatsApp.
+        Remplissez vos informations ci-dessous — nous vous appelons pour confirmer la commande.
         Paiement à la livraison.
       </p>
 
@@ -289,10 +223,88 @@ export function Checkout() {
           disabled={isSubmitting || items.length === 0}
           className="w-full flex items-center justify-center gap-2 bg-[#C41E3A] text-white py-4 rounded-xl text-sm font-bold uppercase tracking-wide hover:bg-[#8F1529] transition-all disabled:opacity-50"
         >
-          {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}
-          {isSubmitting ? "Envoi en cours..." : "Confirmer via WhatsApp"}
+          {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <ShoppingBag size={18} />}
+          {isSubmitting ? "Envoi en cours..." : "Confirmer la Commande"}
         </button>
       </form>
+    </div>
+  );
+}
+
+/** Shown right after the order is saved — no other page or app opens. */
+function Receipt({ order }) {
+  const line = (label, value) =>
+    value ? (
+      <div className="flex justify-between gap-4">
+        <span className="text-[#A0A0A0]">{label}</span>
+        <span className="text-right text-[#F4F4F5]">{value}</span>
+      </div>
+    ) : null;
+
+  return (
+    <div className="max-w-xl mx-auto pt-32 pb-24 px-6">
+      <div className="text-center space-y-3 mb-8">
+        <CheckCircle size={56} className="mx-auto text-green-500" />
+        <h1 className="text-2xl font-bold text-[#F4F4F5]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+          Merci {order.customerName.split(" ")[0]}, votre commande est envoyée !
+        </h1>
+        <p className="text-sm text-[#A0A0A0]">
+          Nous vous appelons au <strong className="text-[#F4F4F5]" dir="ltr">{order.phone}</strong> pour
+          confirmer la livraison. Paiement à la livraison.
+        </p>
+      </div>
+
+      <section className="bg-[#1E1E1E] border border-[#2A2A2A] border-t-4 border-t-[#C41E3A] rounded-xl p-6 text-sm space-y-5">
+        <div className="flex justify-between items-baseline gap-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[#A0A0A0]">Reçu de commande</h2>
+          <span className="text-lg font-bold text-[#F4F4F5]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+            {order.orderNumber}
+          </span>
+        </div>
+
+        <div className="space-y-1.5">
+          {line("Date", order.createdAt && new Date(order.createdAt).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" }))}
+          {line("Nom", order.customerName)}
+          {line("Téléphone", order.phone)}
+          {line("Ville", order.city)}
+          {line("Adresse", order.address)}
+        </div>
+
+        <div className="border-t border-[#2A2A2A] pt-4 space-y-2">
+          {order.items.map((item, i) => (
+            <div key={i} className="flex justify-between gap-4">
+              <span className="text-[#F4F4F5]/85">
+                {item.title} × {item.quantity}
+              </span>
+              <span className="text-[#F4F4F5] whitespace-nowrap">{money(item.price * item.quantity)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between text-[#A0A0A0]">
+            <span>Livraison</span>
+            <span>selon confirmation</span>
+          </div>
+          <div className="flex justify-between pt-3 border-t border-[#2A2A2A] text-base font-bold text-[#F4F4F5]">
+            <span>Total</span>
+            <span className="text-[#C41E3A]">{money(order.total)}</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center print:hidden">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="inline-flex items-center justify-center gap-2 border border-[#2A2A2A] text-[#F4F4F5] px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:border-[#C41E3A]"
+        >
+          <Printer size={16} /> Imprimer le reçu
+        </button>
+        <Link
+          href="/produit"
+          className="inline-flex items-center justify-center bg-[#C41E3A] text-white px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#8F1529]"
+        >
+          Continuer mes achats
+        </Link>
+      </div>
     </div>
   );
 }

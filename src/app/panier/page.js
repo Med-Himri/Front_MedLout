@@ -138,7 +138,7 @@ export default function CartPage() {
                 </button>
 
                 <p className="text-center mt-6 text-[#A0A0A0] text-[11px]">
-                  Commande via WhatsApp — Aucun Paiement en Ligne Requis
+                  Paiement à la livraison — Aucun paiement en ligne
                 </p>
               </div>
             </div>
