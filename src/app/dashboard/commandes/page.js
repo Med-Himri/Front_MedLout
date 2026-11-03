@@ -64,8 +64,8 @@ function Orders() {
     <div className="space-y-6">
       <PageTitle>Commandes</PageTitle>
       <p className="text-sm text-[#626060]">
-        Chaque commande du site est enregistrée ici <strong>et</strong> envoyée sur WhatsApp avec le
-        même numéro (ex. ML-7K2QX9) pour retrouver la conversation.
+        Chaque commande passée sur le site arrive ici, et vous recevez aussi un email avec son
+        numéro (ex. ML-7K2QX9).
       </p>
 
       <div className="flex flex-wrap gap-2 text-sm">

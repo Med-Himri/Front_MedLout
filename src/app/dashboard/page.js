@@ -24,7 +24,7 @@ export default function DashboardHome() {
 
   const todo = [
     d.toCall > 0 && {
-      text: `${d.toCall} nouvelle${d.toCall > 1 ? "s" : ""} commande${d.toCall > 1 ? "s" : ""} à confirmer par téléphone / WhatsApp.`,
+      text: `${d.toCall} nouvelle${d.toCall > 1 ? "s" : ""} commande${d.toCall > 1 ? "s" : ""} à confirmer par téléphone.`,
       href: "/dashboard/commandes?status=pending",
       cta: "Les ouvrir",
     },

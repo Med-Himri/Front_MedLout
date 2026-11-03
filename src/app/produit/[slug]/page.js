@@ -170,7 +170,7 @@ export default async function ProductPage({ params }) {
 
             <div className="flex items-center gap-2 pt-4 text-[11px] text-[#A0A0A0]">
               <ShieldCheck size={14} className="text-[#C41E3A]" />
-              Commande via WhatsApp — Livraison partout au Maroc
+              Paiement à la livraison — Livraison partout au Maroc
             </div>
           </div>
         </div>
