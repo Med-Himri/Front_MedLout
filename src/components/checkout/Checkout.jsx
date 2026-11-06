@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,6 +9,7 @@ import { CheckCircle, Loader2, Minus, Plus, Printer, ShoppingBag } from "lucide-
 import axiosInstance, { apiError } from "@/utils/axiosInstance";
 import { clearCart, removeFromCart } from "@/redux/slices/cartSlice";
 import { getSingleProductAPI } from "@/services/product.service";
+import { itemsParams, track } from "@/lib/metaPixel";
 
 const money = (n) => `${Number(n).toFixed(2)} DH`;
 
@@ -49,6 +50,16 @@ export function Checkout() {
   const isBuyNow = buyNow.status !== "off";
   const items = isBuyNow ? (buyNow.item ? [{ ...buyNow.item, quantity: buyNowQty }] : []) : cartItems;
 
+  // Meta Pixel: InitiateCheckout once, when the order form shows its products
+  const checkoutTracked = useRef(false);
+  const itemsReady = isBuyNow ? buyNow.status === "ready" : hydrated && cartItems.length > 0;
+  useEffect(() => {
+    if (!itemsReady || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    track("InitiateCheckout", itemsParams(items));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemsReady]);
+
   const [form, setForm] = useState({ customerName: "", phone: "", city: "", address: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [placed, setPlaced] = useState(null); // the saved order, shown as a receipt
@@ -82,6 +93,12 @@ export function Checkout() {
       });
       if (!isBuyNow) dispatch(clearCart()); // a quick order never empties the cart
       setPlaced(data.order);
+      // Meta Pixel: the real order (server prices); the order number avoids double counting
+      track(
+        "Purchase",
+        itemsParams(data.order.items.map((i) => ({ id: i.product, price: i.price, quantity: i.quantity }))),
+        data.order.orderNumber
+      );
       window.scrollTo({ top: 0 });
     } catch (err) {
       const unavailable = err.response?.data?.unavailable;

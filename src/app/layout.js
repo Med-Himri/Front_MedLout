@@ -4,6 +4,7 @@ import { Rajdhani, Inter } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CartHydrator } from "@/components/CartHydrator";
+import { MetaPixel } from "@/components/MetaPixel";
 import Script from "next/script";
 import { SITE_URL } from "@/lib/site";
 
@@ -66,6 +67,8 @@ export default function RootLayout({ children }) {
           `}
         </Script>
 
+        {/* Off until NEXT_PUBLIC_META_PIXEL_ID is set in Vercel */}
+        <MetaPixel />
         <ReduxProvider>
           <CartHydrator />
           {children}
