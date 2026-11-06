@@ -3,6 +3,7 @@ import { Header } from "@/components/home/Header";
 import { Footer } from "@/components/home/Footer";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import BuyNowButton from "@/components/cart/BuyNowButton";
+import { TrackViewContent } from "@/components/MetaPixel";
 import ProductGallery from "@/components/product/ProductGallery";
 import { CheckCircle, ShieldCheck, Package, ChevronRight } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
@@ -101,6 +102,7 @@ export default async function ProductPage({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <Header />
+      <TrackViewContent product={{ _id: product._id, title: product.title, category: product.category, price: product.price, discountPrice: product.discountPrice }} />
 
       <main className="max-w-6xl mx-auto px-6 pt-32 pb-24">
         {/* Breadcrumb */}
