@@ -9,10 +9,8 @@ import { toast } from "react-toastify";
 import { ImagePlus, X } from "lucide-react";
 import { createProductAPI, deleteProductAPI, updateProductAPI } from "@/services/product.service";
 import { apiError } from "@/utils/axiosInstance";
+import { IMAGE_ACCEPT, TOO_MANY_PHOTOS, prepareImage, uploadFits } from "@/utils/prepareImage";
 import { Card, PageTitle, button, buttonDanger, buttonOutline, input, label } from "./ui";
-
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const MAX_MB = 8;
 
 const slugify = (str = "") =>
   str
@@ -21,12 +19,6 @@ const slugify = (str = "") =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-const checkImage = (file) => {
-  if (!IMAGE_TYPES.includes(file.type)) return "Formats acceptés : JPEG, PNG, WEBP, AVIF.";
-  if (file.size > MAX_MB * 1024 * 1024) return `Image trop lourde (${MAX_MB} Mo maximum).`;
-  return null;
-};
 
 const emptyForm = {
   title: "",
@@ -76,6 +68,7 @@ export default function ProductForm({ product, categories = [] }) {
   const [removeGallery, setRemoveGallery] = useState([]);
   const [newGallery, setNewGallery] = useState([]); // [{ file, preview }]
   const [saving, setSaving] = useState(false);
+  const [preparing, setPreparing] = useState(false);
 
   /* ---------- rich text editor ---------- */
   const modules = useMemo(
@@ -122,26 +115,37 @@ export default function ProductForm({ product, categories = [] }) {
     }));
   const onField = (e) => set(e.target.name, e.target.type === "checkbox" ? e.target.checked : e.target.value);
 
-  const onMainImage = (e) => {
-    const file = e.target.files?.[0];
+  const onMainImage = async (e) => {
+    const picked = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
-    const problem = checkImage(file);
-    if (problem) return toast.error(problem);
-    setMainImage(file);
-    setMainPreview(URL.createObjectURL(file));
+    if (!picked) return;
+    setPreparing(true);
+    try {
+      const file = await prepareImage(picked);
+      setMainImage(file);
+      setMainPreview(URL.createObjectURL(file));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setPreparing(false);
+    }
   };
 
-  const onGallery = (e) => {
-    const files = Array.from(e.target.files || []);
+  const onGallery = async (e) => {
+    const picked = Array.from(e.target.files || []);
     e.target.value = "";
+    setPreparing(true);
     const ok = [];
-    for (const file of files) {
-      const problem = checkImage(file);
-      if (problem) toast.error(`${file.name} : ${problem}`);
-      else ok.push({ file, preview: URL.createObjectURL(file) });
+    for (const original of picked) {
+      try {
+        const file = await prepareImage(original);
+        ok.push({ file, preview: URL.createObjectURL(file) });
+      } catch (err) {
+        toast.error(`${original.name} : ${err.message}`);
+      }
     }
     setNewGallery((g) => [...g, ...ok].slice(0, 10));
+    setPreparing(false);
   };
 
   const dropExisting = (img) => {
@@ -166,6 +170,7 @@ export default function ProductForm({ product, categories = [] }) {
     }
     if (descriptionIsEmpty) return toast.error("Écrivez une description.");
     if (isNew && !mainImage) return toast.error("Ajoutez une image principale.");
+    if (!uploadFits([mainImage, ...newGallery.map((g) => g.file)])) return toast.error(TOO_MANY_PHOTOS);
 
     setSaving(true);
     const payload = {
@@ -220,8 +225,8 @@ export default function ProductForm({ product, categories = [] }) {
                 Voir sur le site ↗
               </a>
             )}
-            <button type="submit" disabled={saving} className={button}>
-              {saving ? "Enregistrement…" : isNew ? "Créer le produit" : "Enregistrer"}
+            <button type="submit" disabled={saving || preparing} className={button}>
+              {saving ? "Enregistrement…" : preparing ? "Préparation des photos…" : isNew ? "Créer le produit" : "Enregistrer"}
             </button>
           </div>
         }
@@ -339,7 +344,7 @@ export default function ProductForm({ product, categories = [] }) {
                   <ImagePlus className="mb-2 text-[#C41E3A]" /> Ajouter une photo
                 </span>
               )}
-              <input type="file" accept={IMAGE_TYPES.join(",")} onChange={onMainImage} className="hidden" />
+              <input type="file" accept={IMAGE_ACCEPT} onChange={onMainImage} className="hidden" />
             </label>
             {mainPreview && <p className="mt-2 text-xs text-[#626060]">Cliquez sur l&apos;image pour la remplacer.</p>}
           </Card>
@@ -354,7 +359,7 @@ export default function ProductForm({ product, categories = [] }) {
               ))}
               <label className="flex aspect-square cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-[#B4B4B4]/50 text-[#C41E3A] hover:border-[#C41E3A]">
                 <ImagePlus size={20} />
-                <input type="file" accept={IMAGE_TYPES.join(",")} multiple onChange={onGallery} className="hidden" />
+                <input type="file" accept={IMAGE_ACCEPT} multiple onChange={onGallery} className="hidden" />
               </label>
             </div>
             {removeGallery.length > 0 && (

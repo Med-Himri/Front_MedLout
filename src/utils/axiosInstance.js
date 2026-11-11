@@ -42,7 +42,11 @@ axiosInstance.interceptors.response.use(
 );
 
 /** The server's French error message, or a fallback. */
-export const apiError = (error, fallback = "Une erreur est survenue") =>
-  error?.response?.data?.message || fallback;
+export const apiError = (error, fallback = "Une erreur est survenue") => {
+  if (error?.response?.status === 413) return "Envoi trop lourd : ajoutez moins de photos à la fois.";
+  // No response at all: offline, or the request was refused before reaching the API
+  if (error && !error.response) return "Connexion impossible avec le serveur. Vérifiez internet et réessayez.";
+  return error?.response?.data?.message || fallback;
+};
 
 export default axiosInstance;
