@@ -7,16 +7,8 @@ import { toast } from "react-toastify";
 import { ImagePlus, Loader2, Sparkles, X } from "lucide-react";
 import { createAIProductAPI } from "@/services/product.service";
 import { apiError } from "@/utils/axiosInstance";
+import { IMAGE_ACCEPT, TOO_MANY_PHOTOS, prepareImage, uploadFits } from "@/utils/prepareImage";
 import { Card, PageTitle, button, input, label } from "@/components/admin/ui";
-
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const MAX_MB = 8;
-
-const checkImage = (file) => {
-  if (!IMAGE_TYPES.includes(file.type)) return "Formats acceptés : JPEG, PNG, WEBP, AVIF.";
-  if (file.size > MAX_MB * 1024 * 1024) return `Image trop lourde (${MAX_MB} Mo maximum).`;
-  return null;
-};
 
 export default function AIProductPage() {
   const router = useRouter();
@@ -27,6 +19,7 @@ export default function AIProductPage() {
   const [mainPreview, setMainPreview] = useState(null);
   const [galleryItems, setGalleryItems] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [preparing, setPreparing] = useState(false);
 
   useEffect(
     () => () => {
@@ -36,27 +29,37 @@ export default function AIProductPage() {
     []
   );
 
-  const onMain = (e) => {
-    const file = e.target.files?.[0];
+  const onMain = async (e) => {
+    const picked = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
-    const problem = checkImage(file);
-    if (problem) return toast.error(problem);
-    setMainImage(file);
-    setMainPreview(URL.createObjectURL(file));
+    if (!picked) return;
+    setPreparing(true);
+    try {
+      const file = await prepareImage(picked);
+      setMainImage(file);
+      setMainPreview(URL.createObjectURL(file));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setPreparing(false);
+    }
   };
 
-  const onGallery = (e) => {
-    const files = Array.from(e.target.files || []);
+  const onGallery = async (e) => {
+    const picked = Array.from(e.target.files || []);
     e.target.value = "";
-    const ok = files
-      .filter((f) => {
-        const problem = checkImage(f);
-        if (problem) toast.error(`${f.name} : ${problem}`);
-        return !problem;
-      })
-      .map((file) => ({ file, preview: URL.createObjectURL(file), alt: "" }));
+    setPreparing(true);
+    const ok = [];
+    for (const original of picked) {
+      try {
+        const file = await prepareImage(original);
+        ok.push({ file, preview: URL.createObjectURL(file), alt: "" });
+      } catch (err) {
+        toast.error(`${original.name} : ${err.message}`);
+      }
+    }
     setGalleryItems((g) => [...g, ...ok].slice(0, 10));
+    setPreparing(false);
   };
 
   const removeGallery = (index) =>
@@ -70,6 +73,7 @@ export default function AIProductPage() {
     if (!productName.trim()) return toast.error("Indiquez le nom du produit.");
     if (!(Number(price) > 0)) return toast.error("Indiquez un prix valide.");
     if (!mainImage) return toast.error("Ajoutez une image principale.");
+    if (!uploadFits([mainImage, ...galleryItems.map((g) => g.file)])) return toast.error(TOO_MANY_PHOTOS);
 
     setBusy(true);
     try {
@@ -89,7 +93,7 @@ export default function AIProductPage() {
       </Link>
       <PageTitle
         action={
-          <button type="submit" disabled={busy} className={button}>
+          <button type="submit" disabled={busy || preparing} className={button}>
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
             {busy ? "Génération… (jusqu'à 30 s)" : "Générer le produit"}
           </button>
@@ -141,7 +145,7 @@ export default function AIProductPage() {
                   <ImagePlus className="mb-2 text-[#C41E3A]" /> Ajouter une photo
                 </span>
               )}
-              <input type="file" accept={IMAGE_TYPES.join(",")} onChange={onMain} className="hidden" />
+              <input type="file" accept={IMAGE_ACCEPT} onChange={onMain} className="hidden" />
             </label>
           </Card>
 
@@ -163,7 +167,7 @@ export default function AIProductPage() {
               ))}
               <label className="flex aspect-square cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-[#B4B4B4]/50 text-[#C41E3A] hover:border-[#C41E3A]">
                 <ImagePlus size={20} />
-                <input type="file" accept={IMAGE_TYPES.join(",")} multiple onChange={onGallery} className="hidden" />
+                <input type="file" accept={IMAGE_ACCEPT} multiple onChange={onGallery} className="hidden" />
               </label>
             </div>
           </Card>
