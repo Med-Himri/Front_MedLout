@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CartHydrator } from "@/components/CartHydrator";
 import { MetaPixel } from "@/components/MetaPixel";
-import Script from "next/script";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { SITE_URL } from "@/lib/site";
 
 const rajdhani = Rajdhani({
@@ -53,21 +53,8 @@ export default function RootLayout({ children }) {
         className={`${inter.className} antialiased bg-[#121212] text-[#F4F4F5]`}
         suppressHydrationWarning
       >
-        {/* Google Analytics — Strategy set to afterInteractive for LCP Optimization */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-N492E2Z2TR"
-          strategy="afterInteractive"
-        />
-        <Script id="medlout-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-N492E2Z2TR');
-          `}
-        </Script>
-
-        {/* Off until NEXT_PUBLIC_META_PIXEL_ID is set in Vercel */}
+        {/* Each is off until its ID is set in Vercel (NEXT_PUBLIC_GA_ID, NEXT_PUBLIC_META_PIXEL_ID) */}
+        <GoogleAnalytics />
         <MetaPixel />
         <ReduxProvider>
           <CartHydrator />

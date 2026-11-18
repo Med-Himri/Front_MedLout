@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { addToCart, increaseQty, decreaseQty } from "@/redux/slices/cartSlice";
 import { itemsParams, track } from "@/lib/metaPixel";
+import { gaEvent, gaItems } from "@/lib/googleAnalytics";
 
 export default function AddToCartButton({ product }) {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ export default function AddToCartButton({ product }) {
   const handleAdd = () => {
     const price = product.discountPrice || product.price;
     track("AddToCart", { ...itemsParams([{ id: product._id, price, quantity: 1 }]), content_name: product.title });
+    gaEvent("add_to_cart", gaItems([{ id: product._id, title: product.title, category: product.category, price, quantity: 1 }]));
     dispatch(
       addToCart({
         id: product._id,

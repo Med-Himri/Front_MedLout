@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { META_PIXEL_ID, PIXEL_CURRENCY, isTrackedPath, loadPixel, track } from "@/lib/metaPixel";
+import { gaEvent, gaItems } from "@/lib/googleAnalytics";
 
 // Loads the Meta Pixel and sends PageView on every page of the shop.
 // Next.js changes pages without reloading, so each new path is sent here.
@@ -21,7 +22,7 @@ export function MetaPixel() {
   return null;
 }
 
-/** Sends ViewContent once when a product page opens. */
+/** Sends "product viewed" (Meta ViewContent + GA4 view_item) once when a product page opens. */
 export function TrackViewContent({ product }) {
   const sent = useRef(false);
 
@@ -38,6 +39,10 @@ export function TrackViewContent({ product }) {
       value: promo ? product.discountPrice : product.price,
       currency: PIXEL_CURRENCY,
     });
+    gaEvent(
+      "view_item",
+      gaItems([{ id: product._id, title: product.title, category: product.category, price: promo ? product.discountPrice : product.price, quantity: 1 }])
+    );
   }, [product]);
 
   return null;
