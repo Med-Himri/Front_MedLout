@@ -10,6 +10,7 @@ import axiosInstance, { apiError } from "@/utils/axiosInstance";
 import { clearCart, removeFromCart } from "@/redux/slices/cartSlice";
 import { getSingleProductAPI } from "@/services/product.service";
 import { itemsParams, track } from "@/lib/metaPixel";
+import { gaEvent, gaItems } from "@/lib/googleAnalytics";
 
 const money = (n) => `${Number(n).toFixed(2)} DH`;
 
@@ -50,13 +51,14 @@ export function Checkout() {
   const isBuyNow = buyNow.status !== "off";
   const items = isBuyNow ? (buyNow.item ? [{ ...buyNow.item, quantity: buyNowQty }] : []) : cartItems;
 
-  // Meta Pixel: InitiateCheckout once, when the order form shows its products
+  // Meta InitiateCheckout + GA4 begin_checkout once, when the order form shows its products
   const checkoutTracked = useRef(false);
   const itemsReady = isBuyNow ? buyNow.status === "ready" : hydrated && cartItems.length > 0;
   useEffect(() => {
     if (!itemsReady || checkoutTracked.current) return;
     checkoutTracked.current = true;
     track("InitiateCheckout", itemsParams(items));
+    gaEvent("begin_checkout", gaItems(items));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsReady]);
 
@@ -93,12 +95,10 @@ export function Checkout() {
       });
       if (!isBuyNow) dispatch(clearCart()); // a quick order never empties the cart
       setPlaced(data.order);
-      // Meta Pixel: the real order (server prices); the order number avoids double counting
-      track(
-        "Purchase",
-        itemsParams(data.order.items.map((i) => ({ id: i.product, price: i.price, quantity: i.quantity }))),
-        data.order.orderNumber
-      );
+      // Meta + GA4 purchase: the real order (server prices); the order number avoids double counting
+      const bought = data.order.items.map((i) => ({ id: i.product, title: i.title, price: i.price, quantity: i.quantity }));
+      track("Purchase", itemsParams(bought), data.order.orderNumber);
+      gaEvent("purchase", { transaction_id: data.order.orderNumber, ...gaItems(bought) });
       window.scrollTo({ top: 0 });
     } catch (err) {
       const unavailable = err.response?.data?.unavailable;
