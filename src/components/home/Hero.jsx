@@ -42,7 +42,7 @@ export function Hero() {
           <div className="inline-flex items-center gap-2 bg-[#C41E3A]/15 border border-[#C41E3A]/40 px-4 py-1.5 rounded-full mb-6">
             <span className="w-2 h-2 rounded-full bg-[#C41E3A] animate-pulse" />
             <span className="text-[#F4F4F5] text-[10px] font-bold uppercase tracking-widest">
-              Accessoires Neufs & Reconditionnés
+              Accessoires Auto · Livraison partout au Maroc
             </span>
           </div>
 
@@ -59,7 +59,7 @@ export function Hero() {
           </h1>
 
           <p className="text-[#F4F4F5]/80 text-base md:text-lg font-medium max-w-md leading-relaxed mb-10">
-            Des accessoires automobiles de qualité pour toutes marques et modèles moteur, freins, filtres, électrique et plus encore.
+            Éclairage LED, chargeurs, aspirateurs, boosters de batterie, confort et sécurité : des accessoires auto pratiques et stylés, payés à la livraison.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-14">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { CATEGORIES } from "@/lib/categories";
 
 export function Footer() {
   return (
@@ -36,13 +37,13 @@ export function Footer() {
               Catégories
             </p>
             <ul className="space-y-3">
-              {["Freins", "Filtres", "Suspension", "Électrique"].map((label) => (
-                <li key={label}>
+              {CATEGORIES.map((c) => (
+                <li key={c.slug}>
                   <Link
-                    href="/produit"
+                    href={`/produit?categorie=${c.slug}`}
                     className="text-xs text-[#E5E5E5]/70 hover:text-[#C41E3A] transition-colors duration-300"
                   >
-                    {label}
+                    {c.label}
                   </Link>
                 </li>
               ))}
