@@ -5,34 +5,13 @@ import Image from "next/image";
 import { SlidersHorizontal, Package } from "lucide-react";
 import { getUniformThumbnail } from "@/utils/cloudinaryImage";
 import { SITE_URL } from "@/lib/site";
+import { CATEGORIES, categoryBySlug, categoryOf } from "@/lib/categories";
 
 export const metadata = {
   title: "Boutique — Tous Nos Accessoires",
   description: "Parcourez notre catalogue complet d'accessoires auto. Livraison partout au Maroc, paiement à la livraison.",
   alternates: { canonical: `${SITE_URL}/produit` },
 };
-
-// Categories already in the database were saved in English (from an earlier
-// version of the AI prompt) — this translates them for display without
-// needing to edit every existing product. New AI-generated products now
-// come out in French directly (see productController.js).
-const CATEGORY_FR = {
-  "Brakes": "Freins",
-  "Filters": "Filtres",
-  "Oil Filters": "Filtres à Huile",
-  "Air Filters": "Filtres à Air",
-  "Fuel Filters": "Filtres à Carburant",
-  "Suspension": "Suspension",
-  "Engine Components": "Composants Moteur",
-  "Electrical": "Électrique",
-  "Cooling System": "Système de Refroidissement",
-  "Exhaust": "Échappement",
-  "Body Parts": "Carrosserie",
-  "Lighting": "Éclairage",
-  "Tools & Accessories": "Outils & Accessoires",
-};
-
-const translateCategory = (cat) => CATEGORY_FR[cat] || cat;
 
 async function fetchProducts() {
   try {
@@ -52,17 +31,15 @@ export default async function ProductListPage({ searchParams }) {
   // searchParams is a promise in Next.js 15+; awaiting a plain object is
   // also safe (it just resolves immediately), so this works either way.
   const resolvedSearchParams = (await searchParams) || {};
-  const activeCategory =
-    typeof resolvedSearchParams.category === "string" ? resolvedSearchParams.category : null;
+  const activeCategory = categoryBySlug(resolvedSearchParams.categorie);
 
   const allProducts = await fetchProducts();
 
-  // Group by category for the filter rail
-  const categories = [...new Set(allProducts.map((p) => p.category).filter(Boolean))];
+  // Only show categories that have at least one product
+  const categories = CATEGORIES.filter((c) => allProducts.some((p) => categoryOf(p)?.slug === c.slug));
 
-  // Filter by the selected category (raw DB value, matched via the URL param)
   const products = activeCategory
-    ? allProducts.filter((p) => p.category === activeCategory)
+    ? allProducts.filter((p) => categoryOf(p)?.slug === activeCategory.slug)
     : allProducts;
 
   return (
@@ -80,7 +57,7 @@ export default async function ProductListPage({ searchParams }) {
               className="text-3xl md:text-4xl font-bold uppercase text-[#F4F4F5]"
               style={{ fontFamily: "'Rajdhani', sans-serif" }}
             >
-              Tous Nos Accessoires
+              {activeCategory ? activeCategory.label : "Tous Nos Accessoires"}
             </h1>
             <p className="text-sm text-[#A0A0A0]">
               {products.length} produit{products.length > 1 ? "s" : ""} disponible{products.length > 1 ? "s" : ""}
@@ -90,6 +67,27 @@ export default async function ProductListPage({ searchParams }) {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Categories on phones (the side rail below is for large screens) */}
+        {categories.length > 0 && (
+          <nav aria-label="Catégories" className="lg:hidden -mx-6 px-6 mb-6 flex gap-2 overflow-x-auto pb-2">
+            {[{ slug: "", label: "Tout" }, ...categories].map((cat) => {
+              const active = cat.slug ? activeCategory?.slug === cat.slug : !activeCategory;
+              return (
+                <Link
+                  key={cat.slug || "all"}
+                  href={cat.slug ? `/produit?categorie=${cat.slug}` : "/produit"}
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
+                    active
+                      ? "border-[#C41E3A] bg-[#C41E3A] text-white"
+                      : "border-[#2A2A2A] bg-[#1E1E1E] text-[#A0A0A0] hover:text-[#F4F4F5]"
+                  }`}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
           {/* Filter rail */}
           <aside className="hidden lg:block">
@@ -114,16 +112,16 @@ export default async function ProductListPage({ searchParams }) {
                   </Link>
                 </li>
                 {categories.map((cat) => (
-                  <li key={cat}>
+                  <li key={cat.slug}>
                     <Link
-                      href={`/produit?category=${encodeURIComponent(cat)}`}
+                      href={`/produit?categorie=${cat.slug}`}
                       className={`block px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        activeCategory === cat
+                        activeCategory?.slug === cat.slug
                           ? "bg-[#C41E3A]/15 text-[#C41E3A] font-semibold"
                           : "text-[#A0A0A0] hover:bg-[#262626] hover:text-[#F4F4F5]"
                       }`}
                     >
-                      {translateCategory(cat)}
+                      {cat.label}
                     </Link>
                   </li>
                 ))}
@@ -173,7 +171,7 @@ export default async function ProductListPage({ searchParams }) {
                       <div className="p-4">
                         {product.category && (
                           <p className="text-[9px] font-bold uppercase tracking-wider text-[#C41E3A] mb-1.5">
-                            {translateCategory(product.category)}
+                            {categoryOf(product)?.label || product.category}
                           </p>
                         )}
                         <h3 className="text-sm font-semibold text-[#F4F4F5] line-clamp-2 mb-2 leading-snug">
