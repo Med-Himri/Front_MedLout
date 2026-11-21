@@ -6,12 +6,12 @@ import { SITE_URL } from "@/lib/site";
 export const metadata = {
   title: "Medlout Auto | Accessoires de Qualité au Maroc",
   description:
-    "Découvrez notre large sélection d'accessoires de qualité. Livraison partout au Maroc.",
+    "Découvrez notre large sélection d'accessoires auto. Livraison gratuite partout au Maroc, paiement à la livraison.",
   keywords:
     "accessoires Maroc, Medlout Auto",
   openGraph: {
     title: "Medlout Auto | Accessoires de Qualité",
-    description: "Accessoires de qualité, livraison partout au Maroc.",
+    description: "Accessoires auto, livraison gratuite partout au Maroc.",
     url: `${SITE_URL}/`,
     siteName: "Medlout Auto",
     type: "website",

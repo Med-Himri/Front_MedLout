@@ -29,7 +29,7 @@ export const metadata = {
     template: "%s | Medlout Auto",
   },
   description:
-    "Medlout Auto propose des accessoires de qualité. Livraison partout au Maroc.",
+    "Medlout Auto propose des accessoires auto de qualité. Livraison gratuite partout au Maroc.",
   robots: {
     index: true,
     follow: true,

@@ -42,7 +42,7 @@ export function Hero() {
           <div className="inline-flex items-center gap-2 bg-[#C41E3A]/15 border border-[#C41E3A]/40 px-4 py-1.5 rounded-full mb-6">
             <span className="w-2 h-2 rounded-full bg-[#C41E3A] animate-pulse" />
             <span className="text-[#F4F4F5] text-[10px] font-bold uppercase tracking-widest">
-              Accessoires Auto · Livraison partout au Maroc
+              Accessoires Auto · Livraison gratuite partout au Maroc
             </span>
           </div>
 
@@ -77,7 +77,7 @@ export function Hero() {
           <div className="grid grid-cols-3 gap-6 max-w-lg">
             {[
               { icon: ShieldCheck, label: "Qualité Vérifiée" },
-              { icon: Truck, label: "Livraison Rapide" },
+              { icon: Truck, label: "Livraison Gratuite" },
               { icon: Wrench, label: "Support Expert" },
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-start gap-2">

@@ -172,7 +172,7 @@ export default async function ProductPage({ params }) {
 
             <div className="flex items-center gap-2 pt-4 text-[11px] text-[#A0A0A0]">
               <ShieldCheck size={14} className="text-[#C41E3A]" />
-              Paiement à la livraison — Livraison partout au Maroc
+              Livraison gratuite partout au Maroc — Paiement à la livraison
             </div>
           </div>
         </div>

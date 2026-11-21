@@ -9,7 +9,7 @@ import { CATEGORIES, categoryBySlug, categoryOf } from "@/lib/categories";
 
 export const metadata = {
   title: "Boutique — Tous Nos Accessoires",
-  description: "Parcourez notre catalogue complet d'accessoires auto. Livraison partout au Maroc, paiement à la livraison.",
+  description: "Parcourez notre catalogue complet d'accessoires auto. Livraison gratuite partout au Maroc, paiement à la livraison.",
   alternates: { canonical: `${SITE_URL}/produit` },
 };
 

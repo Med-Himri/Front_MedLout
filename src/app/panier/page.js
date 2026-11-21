@@ -122,7 +122,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-[#A0A0A0]">
                     <span>Livraison</span>
-                    <span className="text-[#C41E3A] font-bold text-xs uppercase">Selon Confirmation</span>
+                    <span className="text-green-500 font-bold text-xs uppercase">Gratuite</span>
                   </div>
                   <div className="pt-6 mt-6 border-t border-[#2A2A2A] flex justify-between text-xl font-bold">
                     <span>Total</span>
@@ -138,7 +138,7 @@ export default function CartPage() {
                 </button>
 
                 <p className="text-center mt-6 text-[#A0A0A0] text-[11px]">
-                  Paiement à la livraison — Aucun paiement en ligne
+                  Livraison gratuite — Paiement à la livraison
                 </p>
               </div>
             </div>

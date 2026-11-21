@@ -98,7 +98,7 @@ export default function ContactPageContent() {
                   </div>
                   <div>
                     <p className="text-white/50 text-[9px] uppercase font-bold">Livraison</p>
-                    <span className="text-white text-sm font-medium">Partout au Maroc</span>
+                    <span className="text-white text-sm font-medium">Gratuite partout au Maroc</span>
                   </div>
                 </div>
               </div>
