@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { CartHydrator } from "@/components/CartHydrator";
 import { MetaPixel } from "@/components/MetaPixel";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { SITE_URL } from "@/lib/site";
 
 const rajdhani = Rajdhani({
@@ -60,6 +61,7 @@ export default function RootLayout({ children }) {
           <CartHydrator />
           {children}
         </ReduxProvider>
+        <WhatsAppButton />
         <ToastContainer position="top-right" autoClose={3000} />
       </body>
     </html>
