@@ -130,7 +130,7 @@ export default function OrderDetailPage({ params }) {
               <tr>
                 <td className="pt-3 text-[#626060]">Livraison</td>
                 <td />
-                <td className="pt-3 text-end text-[#626060]">selon confirmation</td>
+                <td className="pt-3 text-end text-[#626060]">gratuite</td>
               </tr>
               <tr className="font-bold">
                 <td className="pt-2">Total</td>

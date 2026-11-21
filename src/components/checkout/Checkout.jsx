@@ -160,7 +160,7 @@ export function Checkout() {
       </h1>
       <p className="text-sm text-[#A0A0A0] mb-8">
         Remplissez vos informations ci-dessous — nous vous appelons pour confirmer la commande.
-        Paiement à la livraison.
+        Livraison gratuite, paiement à la livraison.
       </p>
 
       <div className="bg-[#1E1E1E] rounded-xl p-5 mb-8 space-y-3 border border-[#2A2A2A]">
@@ -202,6 +202,10 @@ export function Checkout() {
             </div>
           ))
         )}
+        <div className="flex justify-between text-sm text-[#A0A0A0]">
+          <span>Livraison</span>
+          <span className="font-semibold text-green-500">Gratuite</span>
+        </div>
         <div className="flex justify-between pt-3 border-t border-[#2A2A2A] font-bold text-[#F4F4F5]">
           <span>Total</span>
           <span>{money(total)}</span>
@@ -267,7 +271,7 @@ function Receipt({ order }) {
         </h1>
         <p className="text-sm text-[#A0A0A0]">
           Nous vous appelons au <strong className="text-[#F4F4F5]" dir="ltr">{order.phone}</strong> pour
-          confirmer la livraison. Paiement à la livraison.
+          confirmer la livraison. Livraison gratuite, paiement à la livraison.
         </p>
       </div>
 
@@ -298,7 +302,7 @@ function Receipt({ order }) {
           ))}
           <div className="flex justify-between text-[#A0A0A0]">
             <span>Livraison</span>
-            <span>selon confirmation</span>
+            <span className="font-semibold text-green-500">Gratuite</span>
           </div>
           <div className="flex justify-between pt-3 border-t border-[#2A2A2A] text-base font-bold text-[#F4F4F5]">
             <span>Total</span>

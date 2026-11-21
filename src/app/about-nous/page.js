@@ -32,7 +32,7 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-10">
           {[
             { icon: ShieldCheck, title: "Qualité Vérifiée", text: "Chaque produit est contrôlé avant sa mise en catalogue." },
-            { icon: Truck, title: "Livraison Rapide", text: "Expédition partout au Maroc, emballage sécurisé." },
+            { icon: Truck, title: "Livraison Gratuite", text: "Livraison gratuite partout au Maroc, emballage sécurisé." },
             { icon: Wrench, title: "Support Expert", text: "Notre équipe vous aide à trouver le bon accessoire." },
           ].map((item, i) => (
             <div key={i} className="bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl p-6 text-left space-y-3 hover:border-[#C41E3A]/40 transition-colors">
