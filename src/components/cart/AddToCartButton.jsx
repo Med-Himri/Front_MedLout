@@ -47,7 +47,7 @@ export default function AddToCartButton({ product }) {
 
         <div className="text-center px-4">
           <div className="text-lg font-bold text-[#F4F4F5]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-            {cartItem.quantity} {cartItem.quantity === 1 ? "Pièce" : "Pièces"}
+            {cartItem.quantity} {cartItem.quantity === 1 ? "Article" : "Articles"}
           </div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-[#C41E3A]">
             Dans le Panier

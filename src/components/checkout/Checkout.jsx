@@ -170,7 +170,7 @@ export function Checkout() {
               <Link href={`/produit/${buyNow.item.slug}`} className="text-[#F4F4F5] font-medium hover:text-[#C41E3A]">
                 {buyNow.item.title}
               </Link>
-              <div className="text-xs text-[#A0A0A0]">{money(buyNow.item.price)} / pièce</div>
+              <div className="text-xs text-[#A0A0A0]">{money(buyNow.item.price)} / unité</div>
             </div>
             <div className="flex items-center gap-2 bg-[#262626] rounded-full p-1">
               <button

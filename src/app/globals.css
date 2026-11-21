@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -28,6 +26,11 @@
   --ma-white:         #FFFFFF;
   --font-display:     'Rajdhani', system-ui, sans-serif;
   --font-ui:          'Inter', system-ui, sans-serif;
+}
+
+/* Inter for the whole site (fonts are bundled, see app/layout.js) */
+body {
+  font-family: var(--font-ui);
 }
 
 /* ── Page shell ── */

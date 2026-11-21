@@ -33,7 +33,7 @@ export default function CartPage() {
             Votre Panier
           </h1>
           <span className="text-xs uppercase tracking-widest text-[#C41E3A] font-bold">
-            {cartItems.length} pièce{cartItems.length > 1 ? "s" : ""}
+            {cartItems.length} article{cartItems.length > 1 ? "s" : ""}
           </span>
         </div>
 
@@ -43,12 +43,12 @@ export default function CartPage() {
               <ShoppingBag size={28} />
             </div>
             <h2 className="text-xl font-bold text-[#F4F4F5] mb-3">Votre panier est vide</h2>
-            <p className="text-[#A0A0A0] text-sm mb-8">Découvrez notre catalogue de pièces auto.</p>
+            <p className="text-[#A0A0A0] text-sm mb-8">Découvrez nos accessoires auto.</p>
             <Link
               href="/produit"
               className="inline-block bg-[#C41E3A] text-white px-8 py-4 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-[#8F1529] transition-all"
             >
-              Voir les Pièces
+              Voir les Accessoires
             </Link>
           </div>
         ) : (
